@@ -1,0 +1,37 @@
+{
+  "slug": "terminal-folio",
+  "version": "1.0.0",
+  "changelog": "Initial release.",
+  "title": "Terminal Folio Prompt",
+  "tagline": "An AI prompt for an interactive retro terminal portfolio in a single HTML file.",
+  "description": "Terminal Folio is a detailed AI prompt that produces a personal portfolio styled as a green or amber phosphor terminal. Visitors can type commands (help, about, projects, open, skills, contact, theme, clear) or simply click the quick-command buttons.\n\nThe prompt specifies the full design and behaviour: ASCII banner, scanlines, typed responses, command history, a live clock, theme switching, and reduced-motion and accessibility rules. The live preview shows the result of running it.\n\nThis is a prompt-only product. It does not include a source code download; paste the prompt into your AI coding tool of choice to generate the page.",
+  "category": "landing-pages",
+  "priceCents": 900,
+  "featured": false,
+  "featuredRank": 0,
+  "licenceType": "standard",
+  "technologies": [
+    "HTML",
+    "CSS",
+    "JavaScript"
+  ],
+  "styles": [
+    "Retro",
+    "Dark"
+  ],
+  "topics": [
+    "Portfolio",
+    "AI prompt"
+  ],
+  "build": "none",
+  "requirements": [
+    "An AI coding assistant or chat model that can write HTML",
+    "A browser to open the generated file"
+  ],
+  "technologyNotes": "The prompt asks for one self-contained index.html with inline CSS and JavaScript.",
+  "posterAlt": "Terminal Folio green phosphor terminal with ASCII name banner",
+  "screenshotAlts": [
+    "Terminal Folio in the amber theme",
+    "Terminal Folio on a mobile screen"
+  ]
+}

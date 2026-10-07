@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tally — neo-brutalist pricing component</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='3' y='3' width='26' height='26' rx='6' fill='%23ffd23f' stroke='%23111' stroke-width='3'/%3E%3C/svg%3E" />
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: #f2ede0;
+        background-image: radial-gradient(#11111122 1.2px, transparent 1.2px);
+        background-size: 22px 22px;
+        color: #111;
+        font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      }
+      main {
+        max-width: 1080px;
+        margin: 0 auto;
+        padding: 64px 24px 80px;
+      }
+      header {
+        text-align: center;
+        margin-bottom: 44px;
+      }
+      .eyebrow {
+        display: inline-block;
+        border: 3px solid #111;
+        background: #5ab8ff;
+        border-radius: 999px;
+        padding: 4px 12px;
+        font: 800 12px/1.4 "Arial Black", Arial, sans-serif;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+      h1 {
+        margin: 18px 0 10px;
+        font: 900 clamp(36px, 6vw, 64px) / 0.95 "Arial Black", "Helvetica Neue", Arial, sans-serif;
+        text-transform: uppercase;
+        letter-spacing: -0.02em;
+      }
+      header p {
+        margin: 0 auto;
+        max-width: 520px;
+        font-size: 17px;
+        line-height: 1.5;
+      }
+      #log {
+        margin: 44px auto 0;
+        max-width: 520px;
+        border: 3px dashed #111;
+        border-radius: 12px;
+        padding: 14px 18px;
+        font: 600 14px/1.5 ui-monospace, Consolas, monospace;
+        background: #fffdf5;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <span class="eyebrow">Pricing</span>
+        <h1>Simple plans.<br />Loud value.</h1>
+        <p>Start free, upgrade when your team grows. Every plan includes unlimited projects and our full template library.</p>
+      </header>
+
+      <tally-pricing currency="USD" billing="monthly" yearly-discount="20">
+        <script type="application/json">
+          [
+            {
+              "id": "solo",
+              "name": "Solo",
+              "description": "For freelancers testing an idea.",
+              "monthly": 0,
+              "features": ["3 active projects", "Community templates", "Export to HTML"],
+              "cta": "Start free"
+            },
+            {
+              "id": "studio",
+              "name": "Studio",
+              "badge": "Most popular",
+              "featured": true,
+              "description": "For small teams shipping client work.",
+              "monthly": 24,
+              "features": ["Unlimited projects", "Premium templates", "Custom domains", "Team comments"]
+            },
+            {
+              "id": "agency",
+              "name": "Agency",
+              "description": "For studios running many brands.",
+              "monthly": 79,
+              "features": ["Everything in Studio", "White-label exports", "Client workspaces", "Priority support"]
+            }
+          ]
+        </script>
+      </tally-pricing>
+
+      <p id="log" role="status" aria-live="polite">Events from the component appear here.</p>
+    </main>
+
+    <script type="module">
+      import "./src/tally-pricing.js";
+
+      const log = document.getElementById("log");
+      const pricing = document.querySelector("tally-pricing");
+      pricing.addEventListener("plan-select", (e) => {
+        const { name, billing, price } = e.detail;
+        log.textContent = `plan-select → ${name} (${billing}, ${price === 0 ? "free" : "$" + price + "/mo"})`;
+      });
+      pricing.addEventListener("billing-change", (e) => {
+        log.textContent = `billing-change → ${e.detail.billing}`;
+      });
+    </script>
+  </body>
+</html>

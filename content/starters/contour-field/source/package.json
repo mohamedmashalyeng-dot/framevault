@@ -1,0 +1,14 @@
+{
+  "name": "contour-field",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Animated topographic contour background on Canvas 2D.",
+  "main": "src/contour-field.js",
+  "scripts": {
+    "start": "node serve.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

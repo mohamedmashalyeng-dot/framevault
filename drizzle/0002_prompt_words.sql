@@ -1,0 +1,1 @@
+ALTER TABLE `product_version` ADD `prompt_words` integer DEFAULT 0 NOT NULL;

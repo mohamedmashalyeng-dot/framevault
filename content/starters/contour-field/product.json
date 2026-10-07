@@ -1,0 +1,36 @@
+{
+  "slug": "contour-field",
+  "version": "1.0.0",
+  "changelog": "Initial release.",
+  "title": "Contour Field Background",
+  "tagline": "Animated topographic contour lines on Canvas, with zero dependencies.",
+  "description": "Contour Field draws a slowly drifting topographic map behind your content. Contours are traced with marching squares over 3D simplex noise, and every fifth line can be highlighted in an accent colour.\n\nIt is built for real pages: frame rate is capped, the animation pauses when the canvas is off screen or the tab is hidden, high-DPI screens stay sharp without overdrawing, and visitors who prefer reduced motion get a single still frame.\n\nThe download includes the module, a demo page with live density, speed, zoom and theme controls, a preview server and documentation with a React example.",
+  "category": "backgrounds",
+  "priceCents": 0,
+  "featured": true,
+  "featuredRank": 4,
+  "licenceType": "free",
+  "technologies": [
+    "Canvas",
+    "JavaScript"
+  ],
+  "styles": [
+    "Generative",
+    "Dark"
+  ],
+  "topics": [
+    "Hero",
+    "Animation"
+  ],
+  "build": "static",
+  "requirements": [
+    "Any modern browser with Canvas 2D",
+    "Optional: Node.js 18+ for the bundled preview server"
+  ],
+  "technologyNotes": "One ES module (src/contour-field.js) exporting createContourField(). No dependencies.",
+  "posterAlt": "Contour Field animated topographic lines behind a large headline",
+  "screenshotAlts": [
+    "Contour Field in the paper theme",
+    "Contour Field on a mobile screen"
+  ]
+}

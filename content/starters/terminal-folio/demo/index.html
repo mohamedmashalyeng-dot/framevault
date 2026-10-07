@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ada@folio:~ — interactive terminal portfolio</title>
+    <meta name="description" content="Portfolio of Ada Okafor, creative developer, presented as an interactive terminal." />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='5' fill='%23071a0e'/%3E%3Cpath d='M7 10l6 6-6 6M15 23h10' fill='none' stroke='%2339ff88' stroke-width='3'/%3E%3C/svg%3E" />
+    <style>
+      :root {
+        --bg: #071a0e;
+        --fg: #39ff88;
+        --dim: #1f9b55;
+        --hi: #d6ffe6;
+        --glow: 0 0 6px rgb(57 255 136 / 0.45);
+        color-scheme: dark;
+      }
+      :root[data-theme="amber"] {
+        --bg: #1a1205;
+        --fg: #ffb547;
+        --dim: #a8701f;
+        --hi: #fff0d6;
+        --glow: 0 0 6px rgb(255 181 71 / 0.45);
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+      }
+      body {
+        background: var(--bg);
+        color: var(--fg);
+        font: 16px/1.55 "IBM Plex Mono", "Cascadia Mono", "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+        text-shadow: var(--glow);
+      }
+      .screen {
+        position: relative;
+        min-height: 100%;
+        padding: 28px clamp(16px, 4vw, 48px) 120px;
+        max-width: 980px;
+        margin: 0 auto;
+      }
+      /* Subtle scanlines; disabled for reduced motion and in print. */
+      body::after {
+        content: "";
+        pointer-events: none;
+        position: fixed;
+        inset: 0;
+        background: repeating-linear-gradient(to bottom, rgb(0 0 0 / 0.16) 0 1px, transparent 1px 3px);
+        mix-blend-mode: multiply;
+      }
+      .bar {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+        padding-bottom: 14px;
+        margin-bottom: 18px;
+        border-bottom: 1px dashed var(--dim);
+        color: var(--dim);
+        font-size: 13px;
+      }
+      pre.ascii {
+        margin: 0 0 8px;
+        font-size: clamp(7px, 1.55vw, 14px);
+        line-height: 1.15;
+        color: var(--hi);
+        overflow: hidden;
+      }
+      .line {
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+      .muted {
+        color: var(--dim);
+      }
+      .hi {
+        color: var(--hi);
+      }
+      a {
+        color: var(--hi);
+        text-decoration: underline dotted;
+        text-underline-offset: 3px;
+      }
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin: 14px 0 22px;
+      }
+      .chips button {
+        font: inherit;
+        font-size: 14px;
+        color: var(--fg);
+        background: transparent;
+        border: 1px solid var(--dim);
+        padding: 4px 10px;
+        cursor: pointer;
+        text-shadow: inherit;
+      }
+      .chips button:hover {
+        background: var(--fg);
+        color: var(--bg);
+        text-shadow: none;
+      }
+      form {
+        display: flex;
+        gap: 10px;
+        align-items: baseline;
+        margin-top: 6px;
+      }
+      form label {
+        white-space: nowrap;
+        color: var(--hi);
+      }
+      #cmd {
+        flex: 1;
+        min-width: 0;
+        background: transparent;
+        border: 0;
+        outline: 0;
+        color: var(--fg);
+        font: inherit;
+        text-shadow: inherit;
+        caret-color: var(--fg);
+      }
+      :focus-visible {
+        outline: 1px dashed var(--hi);
+        outline-offset: 3px;
+      }
+      #cmd:focus-visible {
+        outline: none;
+      }
+      .cursor {
+        display: inline-block;
+        width: 0.6em;
+        height: 1.1em;
+        vertical-align: text-bottom;
+        background: var(--fg);
+        animation: blink 1s steps(1) infinite;
+      }
+      @keyframes blink {
+        50% {
+          opacity: 0;
+        }
+      }
+      .grid {
+        display: grid;
+        gap: 4px 24px;
+        grid-template-columns: max-content 1fr;
+      }
+      @media (max-width: 560px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+        .grid dt {
+          margin-top: 8px;
+        }
+      }
+      dl,
+      dd {
+        margin: 0;
+      }
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        white-space: nowrap;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        body::after {
+          display: none;
+        }
+        .cursor {
+          animation: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="screen">
+      <div class="bar" aria-hidden="true">
+        <span>ada@folio:~</span>
+        <span id="clock">--:--</span>
+      </div>
+
+      <h1 class="sr-only">Ada Okafor, creative developer: interactive terminal portfolio</h1>
+      <pre class="ascii" aria-hidden="true">
+    _       _        ___  _         __
+   /_\   __| | __ _ / _ \| | ____ _/ _| ___  _ __
+  //_\\ / _` |/ _` | | | | |/ / _` | |_ / _ \| '__|
+ /  _  \ (_| | (_| | |_| |   < (_| |  _| (_) | |
+ \_/ \_/\__,_|\__,_|\___/|_|\_\__,_|_|  \___/|_|</pre>
+
+      <div id="output" role="log" aria-live="polite" aria-label="Terminal output"></div>
+
+      <nav class="chips" aria-label="Quick commands">
+        <button type="button" data-cmd="about">about</button>
+        <button type="button" data-cmd="projects">projects</button>
+        <button type="button" data-cmd="skills">skills</button>
+        <button type="button" data-cmd="contact">contact</button>
+        <button type="button" data-cmd="theme">theme</button>
+        <button type="button" data-cmd="help">help</button>
+      </nav>
+
+      <form id="prompt" autocomplete="off">
+        <label for="cmd">guest@folio:~$</label>
+        <input id="cmd" name="cmd" spellcheck="false" aria-describedby="hint" />
+      </form>
+      <p id="hint" class="muted">Type a command and press Enter, or use the buttons above. Try <span class="hi">help</span>.</p>
+    </main>
+
+    <script>
+      (() => {
+        const output = document.getElementById("output");
+        const input = document.getElementById("cmd");
+        const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+        const history = [];
+        let historyIndex = 0;
+
+        const projects = [
+          ["tidepool", "2025", "Generative ocean soundscape for a museum atrium. WebAudio + WebGL."],
+          ["ledger.css", "2024", "A 2 KB CSS framework for printable invoices and receipts."],
+          ["nightbus", "2024", "Real-time bus tracker for night routes; 40k weekly riders in beta."],
+          ["paperwall", "2023", "Browser extension that turns long articles into print-ready zines."],
+        ];
+
+        const commands = {
+          help: () => [
+            ["Available commands:", "hi"],
+            ["  about      who I am"],
+            ["  projects   selected work"],
+            ["  skills     tools I use every day"],
+            ["  contact    how to reach me"],
+            ["  theme      switch between green and amber phosphor"],
+            ["  clear      clear the screen"],
+          ],
+          about: () => [
+            ["Ada Okafor — creative developer, Lagos → Lisbon.", "hi"],
+            ["I build interactive installations, tools for writers and small, fast websites."],
+            ["Currently freelancing; open to residencies and studio collaborations."],
+          ],
+          projects: () => [
+            ["Selected projects", "hi"],
+            ...projects.map(([name, year, text]) => [`  ${name.padEnd(12)} ${year}  ${text}`]),
+            ["Type `open <name>` for details, e.g. open tidepool", "muted"],
+          ],
+          skills: () => [
+            ["Languages   TypeScript, Rust, GLSL, Python"],
+            ["Front end   React, Svelte, Web Components, Canvas, WebGL"],
+            ["Back end    Node.js, Postgres, SQLite, Cloudflare Workers"],
+            ["Practice    accessibility, performance budgets, print design"],
+          ],
+          contact: () => [
+            ["Email     ", "html", '<a href="mailto:hello@example.com">hello@example.com</a>'],
+            ["Elsewhere ", "html", '<a href="https://example.com" rel="noopener">example.com</a>'],
+          ],
+          theme: () => {
+            const root = document.documentElement;
+            const next = root.dataset.theme === "amber" ? "green" : "amber";
+            if (next === "amber") root.dataset.theme = "amber";
+            else delete root.dataset.theme;
+            return [[`Phosphor set to ${next}.`, "muted"]];
+          },
+          clear: () => {
+            output.replaceChildren();
+            return [];
+          },
+        };
+
+        function open(name) {
+          const p = projects.find(([n]) => n === name);
+          if (!p) return [[`open: no such project: ${name || "(none)"}`, "muted"]];
+          return [[`${p[0]} (${p[1]})`, "hi"], [`  ${p[2]}`], ["  Case study available on request.", "muted"]];
+        }
+
+        function write(text, kind) {
+          const line = document.createElement("div");
+          line.className = `line ${kind === "hi" ? "hi" : kind === "muted" ? "muted" : ""}`;
+          line.textContent = text;
+          output.append(line);
+          return line;
+        }
+
+        async function type(text, kind) {
+          if (reduceMotion) return write(text, kind);
+          const line = write("", kind);
+          for (let i = 0; i <= text.length; i += 2) {
+            line.textContent = text.slice(0, i);
+            await new Promise((r) => setTimeout(r, 8));
+          }
+          line.textContent = text;
+          return line;
+        }
+
+        async function run(raw) {
+          const value = raw.trim();
+          if (!value) return;
+          history.push(value);
+          historyIndex = history.length;
+          write(`guest@folio:~$ ${value}`, "muted");
+          const [name, ...args] = value.toLowerCase().split(/\s+/);
+          const lines = name === "open" ? open(args[0]) : commands[name] ? commands[name]() : [[`command not found: ${name}. Type help.`, "muted"]];
+          for (const [text, kind, html] of lines) {
+            const line = await type(text, kind === "html" ? "" : kind);
+            if (kind === "html") line.insertAdjacentHTML("beforeend", html);
+          }
+          window.scrollTo({ top: document.body.scrollHeight, behavior: reduceMotion ? "auto" : "smooth" });
+        }
+
+        document.getElementById("prompt").addEventListener("submit", (event) => {
+          event.preventDefault();
+          const value = input.value;
+          input.value = "";
+          run(value);
+        });
+
+        input.addEventListener("keydown", (event) => {
+          if (event.key === "ArrowUp" && historyIndex > 0) {
+            input.value = history[--historyIndex];
+            event.preventDefault();
+          } else if (event.key === "ArrowDown") {
+            historyIndex = Math.min(history.length, historyIndex + 1);
+            input.value = history[historyIndex] ?? "";
+            event.preventDefault();
+          }
+        });
+
+        document.querySelectorAll("[data-cmd]").forEach((button) =>
+          button.addEventListener("click", () => {
+            run(button.dataset.cmd);
+            input.focus();
+          }),
+        );
+
+        const clock = document.getElementById("clock");
+        const tick = () => (clock.textContent = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }));
+        tick();
+        setInterval(tick, 30_000);
+
+        (async () => {
+          await type("Welcome. This portfolio is a terminal — but you can also just click.", "hi");
+          await type("Last login: from a browser near you");
+          await run("about");
+        })();
+      })();
+    </script>
+  </body>
+</html>

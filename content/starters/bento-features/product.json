@@ -1,0 +1,36 @@
+{
+  "slug": "bento-features",
+  "version": "1.0.0",
+  "changelog": "Initial release.",
+  "title": "Bento Feature Grid",
+  "tagline": "A soft pastel bento-box feature section in plain HTML and CSS.",
+  "description": "Bento is a responsive feature section made of six pastel tiles of different sizes, each with a small illustration drawn entirely in HTML and CSS: a growing bar chart, notification toggles, a chat thread, a headline metric, overlapping avatars and a mini calendar.\n\nEvery selector is scoped under .bento, so you can paste the section into an existing page without side effects. Colours, radius and spacing are custom properties, and the grid collapses cleanly to two columns and then one.\n\nNo JavaScript, no framework and no external assets.",
+  "category": "sections",
+  "priceCents": 0,
+  "featured": false,
+  "featuredRank": 0,
+  "licenceType": "free",
+  "technologies": [
+    "HTML",
+    "CSS"
+  ],
+  "styles": [
+    "Pastel",
+    "Light"
+  ],
+  "topics": [
+    "Features",
+    "SaaS"
+  ],
+  "build": "static",
+  "requirements": [
+    "Any modern browser",
+    "Optional: Node.js 18+ for the bundled preview server"
+  ],
+  "technologyNotes": "One stylesheet and one HTML section. No build step.",
+  "posterAlt": "Bento feature grid with peach, lilac, mint and sky tiles",
+  "screenshotAlts": [
+    "Bento tiles with calendar and avatars",
+    "Bento grid on a mobile screen"
+  ]
+}

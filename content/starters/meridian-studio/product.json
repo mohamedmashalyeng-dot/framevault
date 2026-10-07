@@ -1,0 +1,40 @@
+{
+  "slug": "meridian-studio",
+  "version": "1.0.0",
+  "changelog": "Initial release.",
+  "title": "Meridian Architecture Studio",
+  "tagline": "An editorial single-page site for architecture and design practices.",
+  "description": "Meridian is a calm, typographic website for a small architecture or design studio. A large serif hero leads into a filterable project index; each project opens in an accessible dialog with an illustrated elevation, summary and key facts.\n\nThe page continues with studio principles, a four-stage process band and a validated contact form that opens a pre-filled email. All artwork is inline SVG, so the site has no image or font requests and works offline.\n\nBuilt with Vite, React 19, TypeScript and Tailwind CSS 4. Colours and fonts are design tokens in one @theme block, and project content lives in a single data file.",
+  "category": "full-websites",
+  "priceCents": 4900,
+  "featured": true,
+  "featuredRank": 1,
+  "licenceType": "standard",
+  "technologies": [
+    "React",
+    "TypeScript",
+    "Tailwind CSS",
+    "Vite"
+  ],
+  "styles": [
+    "Editorial",
+    "Light"
+  ],
+  "topics": [
+    "Portfolio",
+    "Architecture",
+    "Agency"
+  ],
+  "build": "vite",
+  "requirements": [
+    "Node.js 20.19+ or 22.12+",
+    "npm 10+ (or pnpm / yarn)",
+    "Any static host for deployment"
+  ],
+  "technologyNotes": "Vite 8 single-page app. `npm run build` type-checks with tsc and outputs static files to dist/ with relative asset paths.",
+  "posterAlt": "Meridian website hero with large serif headline on warm paper background",
+  "screenshotAlts": [
+    "Meridian selected work grid with project elevations",
+    "Meridian on a mobile screen"
+  ]
+}

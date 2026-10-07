@@ -1,0 +1,37 @@
+{
+  "slug": "tally-pricing",
+  "version": "1.0.0",
+  "changelog": "Initial release.",
+  "title": "Tally Pricing Component",
+  "tagline": "A neo-brutalist pricing table as a dependency-free Web Component.",
+  "description": "Tally is a bold pricing table packaged as a <tally-pricing> custom element. It reads plans from inline JSON, switches between monthly and yearly billing with a configurable discount, formats prices for any currency and locale, and emits a plan-select event when a visitor chooses a plan.\n\nBecause it is a standard Web Component with Shadow DOM styles, it drops into React, Vue, Svelte, Astro or plain HTML without a build step. Theme it with CSS custom properties or style its exposed parts.\n\nThe download includes the component, a demo page with an event log, a zero-dependency preview server and full documentation.",
+  "category": "components",
+  "priceCents": 1200,
+  "featured": true,
+  "featuredRank": 3,
+  "licenceType": "standard",
+  "technologies": [
+    "Web Components",
+    "JavaScript",
+    "CSS"
+  ],
+  "styles": [
+    "Neo-brutalist",
+    "Light"
+  ],
+  "topics": [
+    "Pricing",
+    "SaaS"
+  ],
+  "build": "static",
+  "requirements": [
+    "Any evergreen browser",
+    "Optional: Node.js 18+ for the bundled preview server"
+  ],
+  "technologyNotes": "One ES module (src/tally-pricing.js). No dependencies and no build step.",
+  "posterAlt": "Tally neo-brutalist pricing cards in yellow, cream and black",
+  "screenshotAlts": [
+    "Tally pricing with yearly billing selected",
+    "Tally pricing on a mobile screen"
+  ]
+}

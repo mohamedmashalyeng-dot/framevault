@@ -1,0 +1,13 @@
+{
+  "name": "bento-features",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Soft pastel bento feature grid section in plain HTML and CSS.",
+  "scripts": {
+    "start": "node serve.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

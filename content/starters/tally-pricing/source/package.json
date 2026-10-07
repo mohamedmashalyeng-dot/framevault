@@ -1,0 +1,14 @@
+{
+  "name": "tally-pricing",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Neo-brutalist pricing table as a dependency-free Web Component.",
+  "main": "src/tally-pricing.js",
+  "scripts": {
+    "start": "node serve.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

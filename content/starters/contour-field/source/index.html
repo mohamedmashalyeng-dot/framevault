@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Contour Field — animated topographic background</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2316171a'/%3E%3Cpath d='M5 20c5-7 9 1 14-5s6-4 8-3M5 25c6-5 10 0 15-3s5-2 7-2' fill='none' stroke='%237cf2c4' stroke-width='2'/%3E%3C/svg%3E" />
+    <style>
+      :root {
+        color-scheme: dark;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: #16171a;
+        color: #f1ede6;
+        font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+      }
+      .hero {
+        position: relative;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        overflow: hidden;
+        isolation: isolate;
+      }
+      .hero canvas {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+      }
+      .copy {
+        max-width: 760px;
+        padding: 24px;
+        text-align: center;
+      }
+      .copy small {
+        font: 600 12px/1 ui-monospace, Consolas, monospace;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: #7cf2c4;
+      }
+      .copy h1 {
+        margin: 18px 0 16px;
+        font-size: clamp(40px, 7vw, 84px);
+        line-height: 0.98;
+        letter-spacing: -0.035em;
+        font-weight: 700;
+        text-shadow: 0 2px 30px #16171a;
+      }
+      .copy p {
+        margin: 0 auto;
+        max-width: 520px;
+        font-size: 18px;
+        line-height: 1.55;
+        color: #bdb8ae;
+        text-shadow: 0 1px 16px #16171a;
+      }
+      .panel {
+        position: fixed;
+        right: 16px;
+        bottom: 16px;
+        width: min(300px, calc(100vw - 32px));
+        padding: 16px;
+        border: 1px solid #ffffff1f;
+        border-radius: 14px;
+        background: #16171ad9;
+        backdrop-filter: blur(10px);
+        font-size: 13px;
+      }
+      .panel h2 {
+        margin: 0 0 10px;
+        font: 600 11px/1 ui-monospace, Consolas, monospace;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: #8d887f;
+      }
+      .panel label {
+        display: grid;
+        grid-template-columns: 76px 1fr 32px;
+        align-items: center;
+        gap: 10px;
+        margin: 8px 0;
+      }
+      .panel output {
+        text-align: right;
+        font-family: ui-monospace, Consolas, monospace;
+        color: #bdb8ae;
+      }
+      .panel input[type="range"] {
+        accent-color: #7cf2c4;
+        width: 100%;
+      }
+      .themes {
+        display: flex;
+        gap: 8px;
+        margin-top: 12px;
+      }
+      .themes button {
+        flex: 1;
+        padding: 7px 0;
+        border: 1px solid #ffffff26;
+        border-radius: 8px;
+        background: transparent;
+        color: inherit;
+        font: inherit;
+        cursor: pointer;
+      }
+      .themes button[aria-pressed="true"] {
+        border-color: #7cf2c4;
+        color: #7cf2c4;
+      }
+      button:focus-visible,
+      input:focus-visible {
+        outline: 2px solid #7cf2c4;
+        outline-offset: 2px;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="hero" aria-labelledby="title">
+      <canvas id="field" aria-hidden="true"></canvas>
+      <div class="copy">
+        <small>Contour Field · Canvas 2D</small>
+        <h1 id="title">Every surface<br />tells a story.</h1>
+        <p>A living topographic map rendered in real time. Drop it behind any hero, with no dependencies, and let your headline do the talking.</p>
+      </div>
+    </section>
+
+    <aside class="panel" aria-label="Background settings">
+      <h2>Settings</h2>
+      <label>Density <input id="levels" type="range" min="6" max="24" step="1" value="14" /><output for="levels">14</output></label>
+      <label>Speed <input id="speed" type="range" min="0" max="1.5" step="0.05" value="0.35" /><output for="speed">0.35</output></label>
+      <label>Zoom <input id="scale" type="range" min="0.0012" max="0.006" step="0.0002" value="0.0026" /><output for="scale">1.0</output></label>
+      <div class="themes" role="group" aria-label="Colour theme">
+        <button type="button" data-theme="graphite" aria-pressed="true">Graphite</button>
+        <button type="button" data-theme="paper" aria-pressed="false">Paper</button>
+        <button type="button" data-theme="night" aria-pressed="false">Night</button>
+      </div>
+    </aside>
+
+    <script type="module">
+      import { createContourField } from "./src/contour-field.js";
+
+      const themes = {
+        graphite: { background: "#16171a", lineColor: "#e8e4dc", accentColor: "#7cf2c4", page: "#16171a", text: "#f1ede6" },
+        paper: { background: "#f3efe7", lineColor: "#2b2925", accentColor: "#c2502e", page: "#f3efe7", text: "#1d1b18" },
+        night: { background: "#0b1020", lineColor: "#7f9cff", accentColor: "#f6c177", page: "#0b1020", text: "#eef1ff" },
+      };
+
+      const field = createContourField(document.getElementById("field"), themes.graphite);
+
+      for (const id of ["levels", "speed", "scale"]) {
+        const input = document.getElementById(id);
+        const output = document.querySelector(`output[for="${id}"]`);
+        input.addEventListener("input", () => {
+          const value = Number(input.value);
+          output.textContent = id === "scale" ? (0.0026 / value).toFixed(1) : String(value);
+          field.setOptions({ [id]: value });
+        });
+      }
+
+      document.querySelectorAll("[data-theme]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const theme = themes[button.dataset.theme];
+          field.setOptions(theme);
+          document.body.style.background = theme.page;
+          document.querySelector(".copy").style.color = theme.text;
+          document.querySelectorAll("[data-theme]").forEach((b) => b.setAttribute("aria-pressed", String(b === button)));
+        });
+      });
+    </script>
+  </body>
+</html>

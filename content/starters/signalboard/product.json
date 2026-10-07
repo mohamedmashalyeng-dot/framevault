@@ -1,0 +1,40 @@
+{
+  "slug": "signalboard",
+  "version": "1.0.0",
+  "changelog": "Initial release.",
+  "title": "Signalboard SaaS Landing",
+  "tagline": "A dark, technical landing page for developer tools and analytics products.",
+  "description": "Signalboard is a launch-ready landing page for a developer-facing SaaS product. The hero pairs a waitlist form with a live, self-updating SVG chart; below it sit a numbered feature grid, accessible code-sample tabs, a pricing table with a monthly/yearly switch, an FAQ and a closing call to action.\n\nThe waitlist form works in two modes: demo mode validates and confirms locally, and setting VITE_WAITLIST_ENDPOINT posts sign-ups as JSON to your own endpoint or form service.\n\nBuilt with Vite, React 19, TypeScript and Tailwind CSS 4, with no other runtime dependencies.",
+  "category": "landing-pages",
+  "priceCents": 2900,
+  "featured": true,
+  "featuredRank": 2,
+  "licenceType": "standard",
+  "technologies": [
+    "React",
+    "TypeScript",
+    "Tailwind CSS",
+    "Vite"
+  ],
+  "styles": [
+    "Technical",
+    "Dark"
+  ],
+  "topics": [
+    "SaaS",
+    "Analytics",
+    "Waitlist"
+  ],
+  "build": "vite",
+  "requirements": [
+    "Node.js 20.19+ or 22.12+",
+    "npm 10+ (or pnpm / yarn)",
+    "Optional: a form endpoint for waitlist sign-ups"
+  ],
+  "technologyNotes": "Vite 8 single-page app with one optional build-time variable (VITE_WAITLIST_ENDPOINT). Output is static.",
+  "posterAlt": "Signalboard landing page hero with live analytics chart on a dark background",
+  "screenshotAlts": [
+    "Signalboard feature grid and code tabs",
+    "Signalboard on a mobile screen"
+  ]
+}

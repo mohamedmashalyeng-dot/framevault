@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bento — soft feature grid section</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='2' y='2' width='17' height='13' rx='4' fill='%23ffd9c7'/%3E%3Crect x='21' y='2' width='9' height='28' rx='4' fill='%23e4dcff'/%3E%3Crect x='2' y='17' width='17' height='13' rx='4' fill='%23d3f2e3'/%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      body {
+        margin: 0;
+        background: #fbf7f1;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Copy everything inside <section class="bento"> ... </section> into your page. -->
+    <section class="bento" aria-labelledby="bento-title">
+      <div class="bento__inner">
+        <header class="bento__head">
+          <span class="bento__eyebrow">Why teams switch</span>
+          <h2 class="bento__title" id="bento-title">Everything your team needs, nothing it doesn't.</h2>
+          <p class="bento__lede">
+            Plan the week, share progress and keep clients in the loop from one calm workspace that never gets in the way.
+          </p>
+        </header>
+
+        <div class="bento__grid">
+          <article class="tile tile--wide tile--peach">
+            <div>
+              <h3>Progress you can see</h3>
+              <p>Weekly charts update themselves from the tasks you already track. No spreadsheets, no status meetings.</p>
+            </div>
+            <div class="mock" aria-hidden="true">
+              <div class="chart"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+            </div>
+          </article>
+
+          <article class="tile tile--narrow tile--tall tile--lilac">
+            <div>
+              <h3>Quiet notifications</h3>
+              <p>Choose exactly what deserves a ping. Everything else waits in a daily digest.</p>
+            </div>
+            <div class="mock" aria-hidden="true">
+              <div class="toggle-row">Mentions <span class="toggle toggle--on"></span></div>
+              <div class="toggle-row">Due today <span class="toggle toggle--on"></span></div>
+              <div class="toggle-row">New comments <span class="toggle"></span></div>
+              <div class="toggle-row">Weekly digest <span class="toggle toggle--on"></span></div>
+            </div>
+          </article>
+
+          <article class="tile tile--narrow tile--mint">
+            <div>
+              <h3>Threads, not noise</h3>
+              <p>Every conversation lives next to the work it is about.</p>
+            </div>
+            <div class="bubbles" aria-hidden="true">
+              <span class="bubble">Can we ship the header today?</span>
+              <span class="bubble bubble--me">Yes — final copy is in.</span>
+            </div>
+          </article>
+
+          <article class="tile tile--narrow tile--butter">
+            <div>
+              <h3>Faster weeks</h3>
+              <p>Teams in our beta cut planning time from hours to minutes.</p>
+            </div>
+            <span class="big-number" aria-hidden="true">−63%</span>
+          </article>
+
+          <article class="tile tile--half tile--sky">
+            <div>
+              <h3>Invite clients safely</h3>
+              <p>Guests see only the boards you share, with comments and approvals but no access to the rest of your workspace.</p>
+            </div>
+            <div class="avatars" aria-hidden="true"><span>A</span><span>K</span><span>M</span><span>+4</span></div>
+          </article>
+
+          <article class="tile tile--half tile--peach">
+            <div>
+              <h3>A calendar that plans with you</h3>
+              <p>Drag tasks onto days and see capacity at a glance before you overcommit.</p>
+            </div>
+            <div class="mock" aria-hidden="true">
+              <div class="calendar">
+                <span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span>
+                <span class="is-busy">3</span><span>4</span><span class="is-busy">5</span><span class="is-today">6</span><span class="is-busy">7</span><span>8</span><span>9</span>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+  </body>
+</html>
