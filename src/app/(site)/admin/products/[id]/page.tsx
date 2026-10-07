@@ -92,9 +92,11 @@ async function Editor({ params, searchParams }: Pick<PageProps<"/admin/products/
             )}
           </div>
         </div>
-        {query.created && (
+        {query.uploaded && (
           <p className="mt-4 rounded-lg bg-mint/10 px-3 py-2 text-sm text-mint">
-            Draft created. Upload a poster and create a first version, then publish.
+            {p.status === "published"
+              ? "Product uploaded and published. It is live in the catalogue."
+              : "Product uploaded as a draft. Review it below, then publish."}
           </p>
         )}
         {p.isDemoContent && (

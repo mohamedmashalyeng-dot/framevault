@@ -50,18 +50,30 @@ function findRoot(paths: string[]): string | null {
   return candidates[0].slice(0, -"index.html".length);
 }
 
-export async function installDemoFromZip(buffer: Buffer): Promise<string> {
+export type DemoOptions = {
+  /**
+   * Skip files that are not static web assets instead of rejecting the
+   * bundle. Used when a plain HTML/CSS/JS source archive doubles as the demo
+   * (README, package.json and similar files are simply not published).
+   */
+  skipUnsupported?: boolean;
+};
+
+/** Validates a demo bundle without writing anything. Returns its root folder. */
+export async function validateDemoZip(buffer: Buffer, opts: DemoOptions = {}): Promise<string> {
   if (buffer.byteLength > DEMO_MAX_ZIP_BYTES) throw new ZipValidationError("Demo bundles must be 40 MB or smaller.");
   const entries = await inspectZip(buffer);
   const root = findRoot(entries.map((e) => e.path));
-  if (root === null) throw new ZipValidationError("The demo bundle must contain an index.html file.");
-
-  const inRoot = entries.filter((e) => e.path.startsWith(root));
-  const rejected = inRoot.find((e) => !demoContentType(e.path));
-  if (rejected) {
-    throw new ZipValidationError(`Unsupported file type in demo bundle: ${rejected.path.slice(0, 80)}`);
+  if (root === null) throw new ZipValidationError("The demo must contain an index.html file.");
+  if (!opts.skipUnsupported) {
+    const rejected = entries.find((e) => e.path.startsWith(root) && !demoContentType(e.path));
+    if (rejected) throw new ZipValidationError(`Unsupported file type in demo bundle: ${rejected.path.slice(0, 80)}`);
   }
+  return root;
+}
 
+export async function installDemoFromZip(buffer: Buffer, opts: DemoOptions = {}): Promise<string> {
+  const root = await validateDemoZip(buffer, opts);
   const key = `demo-${randomToken(12)}`;
   try {
     await extractZip(

@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 
 const LINKS = [
   { href: "/admin", label: "Overview" },
+  { href: "/admin/products/new", label: "Upload product" },
   { href: "/admin/products", label: "Products" },
   { href: "/admin/taxonomy", label: "Categories & tags" },
   { href: "/admin/orders", label: "Orders" },
@@ -17,7 +18,8 @@ export function AdminNav() {
   return (
     <nav aria-label="Admin" className="mt-4 flex gap-1 overflow-x-auto lg:flex-col">
       {LINKS.map((l) => {
-        const active = l.href === "/admin" ? pathname === "/admin" : pathname.startsWith(l.href);
+        const exact = l.href === "/admin" || l.href === "/admin/products/new";
+        const active = exact ? pathname === l.href : pathname.startsWith(l.href) && pathname !== "/admin/products/new";
         return (
           <Link
             key={l.href}

@@ -80,7 +80,7 @@ async function Overview() {
 
       <section className="mt-10 grid gap-4 md:grid-cols-3">
         {[
-          ["/admin/products/new", "Add a product", "Create a draft, upload media and a source archive, then publish."],
+          ["/admin/products/new", "Upload a product", "Details, preview images, source code ZIP, live demo and prompt on one page."],
           ["/admin/taxonomy", "Organise the catalogue", "Manage categories and the technology, style and topic tags."],
           ["/admin/settings", "Store settings", "Turn the all-access bundle on or off and set its price."],
         ].map(([href, title, body]) => (

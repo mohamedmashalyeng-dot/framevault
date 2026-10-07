@@ -26,13 +26,14 @@ import {
 } from "../admin/catalogue";
 import { setUserRole } from "../admin/people";
 import { CATALOGUE_TAG, SETTINGS_TAG } from "../catalogue/cached";
-import { storeSourceArchive } from "../ingest/archive";
-import { installDemoFromZip } from "../ingest/demo";
+import { storeSourceArchive, validateSourceArchive } from "../ingest/archive";
+import { installDemoFromZip, removeDemo, validateDemoZip } from "../ingest/demo";
 import { ImageValidationError } from "../ingest/media";
 import { readZipEntry, ZipValidationError } from "../ingest/zip";
 import { refundOrder } from "../orders";
 import { ForbiddenError, requireAdminAction } from "../session";
 import { saveAllAccessSettings } from "../settings";
+import { removePrefix } from "../storage";
 
 /**
  * Administrator Server Actions. Every action re-checks the admin role on the
@@ -89,21 +90,15 @@ async function readUpload(data: FormData, key: string): Promise<{ name: string; 
   return { name: file.name, buffer: Buffer.from(await file.arrayBuffer()) };
 }
 
+async function readUploads(data: FormData, key: string, max: number) {
+  const files = data.getAll(key).filter((f): f is File => f instanceof File && f.size > 0);
+  if (files.length > max) throw new AdminInputError(`Upload at most ${max} screenshots at a time.`);
+  return Promise.all(files.map(async (f) => ({ name: f.name, buffer: Buffer.from(await f.arrayBuffer()) })));
+}
+
 /* -------------------------------------------------------------------------- */
 /* Products                                                                   */
 /* -------------------------------------------------------------------------- */
-
-export async function createProductAction(_prev: AdminFormState, data: FormData): Promise<AdminFormState> {
-  let id: string;
-  try {
-    await requireAdminAction();
-    id = await createProduct(readProductForm(data));
-    updateTag(CATALOGUE_TAG);
-  } catch (error) {
-    return failure(error);
-  }
-  redirect(`/admin/products/${id}?created=1`);
-}
 
 export async function updateProductAction(productId: string, _prev: AdminFormState, data: FormData): Promise<AdminFormState> {
   try {
@@ -137,6 +132,74 @@ export async function deleteDraftAction(productId: string): Promise<AdminFormSta
     return failure(error);
   }
   redirect("/admin/products?deleted=1");
+}
+
+/**
+ * One-page upload: creates the product, its preview images, source archive,
+ * demo and prompt in one step, and optionally publishes it. Every file is
+ * validated before anything is written; if a later step fails, the partial
+ * draft and its stored files are removed again.
+ */
+export async function uploadProductAction(_prev: AdminFormState, data: FormData): Promise<AdminFormState> {
+  let productId: string | null = null;
+  const storedArchives: string[] = [];
+  const installedDemos: string[] = [];
+  let versionCreated = false;
+  try {
+    await requireAdminAction();
+    const input = readProductForm(data);
+    const poster = await readUpload(data, "poster");
+    if (!poster) throw new AdminInputError("Add a poster image so the product has a preview in the catalogue.");
+    const screenshots = await readUploads(data, "screenshots", 6);
+    const archiveUpload = await readUpload(data, "archive");
+    const demoUpload = await readUpload(data, "demo");
+    const useSourceAsDemo = data.get("useSourceAsDemo") === "on";
+    const prompt = String(data.get("prompt") ?? "");
+    if (!prompt.trim() && !archiveUpload) throw new AdminInputError("Add a prompt, a source code ZIP, or both.");
+    if (useSourceAsDemo && !archiveUpload) throw new AdminInputError("Upload the source code ZIP to use it as the live demo.");
+
+    // Validate every file first so a bad upload never leaves a half-made product.
+    if (archiveUpload) await validateSourceArchive(archiveUpload.buffer);
+    if (demoUpload) await validateDemoZip(demoUpload.buffer);
+    else if (useSourceAsDemo) await validateDemoZip(archiveUpload!.buffer, { skipUnsupported: true });
+
+    productId = await createProduct(input);
+    await addProductMedia(productId, "poster", poster.buffer, text(data, "posterAlt") || `${input.title} preview`);
+    for (const [i, shot] of screenshots.entries()) {
+      await addProductMedia(productId, "screenshot", shot.buffer, `${input.title} screenshot ${i + 1}`);
+    }
+
+    const archive = archiveUpload ? await storeSourceArchive(archiveUpload.buffer, archiveUpload.name) : null;
+    if (archive) storedArchives.push(archive.archiveKey);
+    let demoKey: string | null = null;
+    if (demoUpload) demoKey = await installDemoFromZip(demoUpload.buffer);
+    else if (useSourceAsDemo) demoKey = await installDemoFromZip(archiveUpload!.buffer, { skipUnsupported: true });
+    if (demoKey) installedDemos.push(demoKey);
+
+    await createVersion(productId, {
+      version: text(data, "version") || "1.0.0",
+      changelog: text(data, "changelog") || "Initial release.",
+      prompt,
+      requirements: String(data.get("requirements") ?? "").split("\n"),
+      technologyNotes: text(data, "technologyNotes"),
+      dependencies: archiveUpload ? await dependenciesFromArchive(archiveUpload.buffer) : [],
+      archive,
+      demoKey,
+      release: true,
+    });
+    versionCreated = true;
+
+    if (data.get("publish") === "on") await setProductStatus(productId, "published");
+    updateTag(CATALOGUE_TAG);
+  } catch (error) {
+    if (productId) await deleteDraftProduct(productId).catch(() => {});
+    if (!versionCreated) {
+      for (const key of storedArchives) await removePrefix("private", key).catch(() => {});
+      for (const key of installedDemos) await removeDemo(key).catch(() => {});
+    }
+    return failure(error);
+  }
+  redirect(`/admin/products/${productId}?uploaded=1`);
 }
 
 /* -------------------------------------------------------------------------- */

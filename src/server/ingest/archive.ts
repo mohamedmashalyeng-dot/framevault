@@ -32,17 +32,23 @@ export function buildManifest(paths: string[]): ArchiveManifest {
   };
 }
 
-/**
- * Validates and stores a source archive in private storage. The key is
- * random and never exposed; downloads are streamed by the download route.
- */
-export async function storeSourceArchive(buffer: Buffer, fileName: string): Promise<StoredArchive> {
+/** Checks size, structure and required files without storing anything. */
+export async function validateSourceArchive(buffer: Buffer): Promise<ArchiveManifest> {
   if (buffer.byteLength > ARCHIVE_MAX_BYTES) throw new ZipValidationError("Source archives must be 50 MB or smaller.");
   const entries = await inspectZip(buffer);
   if (entries.length === 0) throw new ZipValidationError("The archive is empty.");
   const manifest = buildManifest(entries.map((e) => e.path));
   if (!manifest.hasReadme) throw new ZipValidationError("Source archives must include a README with setup instructions.");
   if (!manifest.hasLicence) throw new ZipValidationError("Source archives must include a LICENCE or LICENSE file.");
+  return manifest;
+}
+
+/**
+ * Validates and stores a source archive in private storage. The key is
+ * random and never exposed; downloads are streamed by the download route.
+ */
+export async function storeSourceArchive(buffer: Buffer, fileName: string): Promise<StoredArchive> {
+  const manifest = await validateSourceArchive(buffer);
 
   const safeName = fileName.replace(/[^a-zA-Z0-9._-]+/g, "-").replace(/^-+/, "").slice(0, 100) || "source.zip";
   const archiveKey = `archives/${randomToken(16)}.zip`;

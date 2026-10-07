@@ -23,7 +23,7 @@ export default function AdminProductsPage({ searchParams }: PageProps<"/admin/pr
       <div className="flex flex-wrap items-center justify-between gap-4">
         <h1 className="text-3xl font-semibold tracking-tight">Products</h1>
         <Link href="/admin/products/new" className="btn btn-primary btn-sm">
-          New product
+          Upload product
         </Link>
       </div>
       <Suspense fallback={<div className="mt-8 h-96 rounded-2xl skeleton" />}>

@@ -36,25 +36,19 @@ export const EMPTY_PRODUCT: ProductFormValues = {
   topics: "",
 };
 
-export function ProductForm({
-  action,
-  categories,
-  initial,
-  submitLabel,
-  tagSuggestions,
-}: {
-  action: (prev: AdminFormState, data: FormData) => Promise<AdminFormState>;
+type FieldProps = {
   categories: { id: string; name: string }[];
   initial: ProductFormValues;
-  submitLabel: string;
   tagSuggestions: { technology: string[]; style: string[]; topic: string[] };
-}) {
-  const [state, run, pending] = useActionState(action, { error: null, success: null });
+};
+
+/** Product detail inputs, shared by the edit form and the one-page upload form. */
+export function ProductFields({ categories, initial, tagSuggestions }: FieldProps) {
   const [price, setPrice] = useState(initial.price);
   const free = Number.parseFloat(price || "0") === 0;
 
   return (
-    <form action={run} className="space-y-6">
+    <>
       <div className="grid gap-5 md:grid-cols-2">
         <div className="md:col-span-2">
           <label htmlFor="title" className="label">
@@ -180,6 +174,25 @@ export function ProductForm({
         ))}
       </fieldset>
 
+    </>
+  );
+}
+
+export function ProductForm({
+  action,
+  categories,
+  initial,
+  submitLabel,
+  tagSuggestions,
+}: FieldProps & {
+  action: (prev: AdminFormState, data: FormData) => Promise<AdminFormState>;
+  submitLabel: string;
+}) {
+  const [state, run, pending] = useActionState(action, { error: null, success: null });
+
+  return (
+    <form action={run} className="space-y-6">
+      <ProductFields categories={categories} initial={initial} tagSuggestions={tagSuggestions} />
       <FormStatus state={state} />
       <button type="submit" disabled={pending} className="btn btn-primary">
         {pending ? "Saving…" : submitLabel}

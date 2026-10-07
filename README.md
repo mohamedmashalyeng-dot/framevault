@@ -39,6 +39,7 @@ Things to try locally:
 | Buy a paid product | Goes to `/checkout/simulated/...` (development only): pay, delay, decline or cancel |
 | `/account` | Library, favourites, orders, settings |
 | `/admin` | Sign in with the seeded admin account |
+| `/admin/products/new` | **Upload a product** on one page: details, poster and screenshots, source code ZIP, live demo ZIP (or the source itself for plain HTML/CSS/JS), AI prompt, publish |
 | `/dev/outbox` | Emails (password reset links) when no email provider is configured |
 
 If port 3000 is busy, run on another port and keep the URLs consistent:
