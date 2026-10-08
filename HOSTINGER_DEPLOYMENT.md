@@ -78,14 +78,26 @@ npm run build
 npm run start
 ```
 
-If hPanel asks for an application startup file, set it to:
+For the most predictable managed deployment, select **Other** instead of the
+auto-detected Next.js mode if hPanel lets you choose the framework manually.
+Use these settings:
 
 ```bash
-server.js
+Build command: npm run build
+Start command: npm run start
+Output directory: .
+Entry file: server.js
 ```
 
-The startup file and `npm run start` both bind Next.js to the `PORT` provided
-by Hostinger and to `0.0.0.0`, which lets Hostinger's proxy reach the app.
+If you keep Hostinger's auto-detected Next.js mode, make sure it still uses:
+
+```bash
+Start command: npm run start
+Entry file: server.js
+```
+
+The root `server.js` starts Next with Hostinger's `PORT` and binds it to
+`0.0.0.0`, which lets Hostinger's proxy reach the app.
 
 The build script currently runs database migrations before `next build` via
 the `prebuild` script. This is intentional for managed Hostinger deployments,

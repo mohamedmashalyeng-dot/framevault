@@ -11,7 +11,6 @@ const noIndex = { key: "X-Robots-Tag", value: "noindex, nofollow" };
 const nextConfig: NextConfig = {
   // The end-to-end suite builds into its own folder so it never disturbs .next.
   distDir: process.env.NEXT_DIST_DIR || ".next",
-  output: "standalone",
   cacheComponents: true,
   partialPrefetching: true,
   poweredByHeader: false,
