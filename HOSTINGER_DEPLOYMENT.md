@@ -78,7 +78,22 @@ npm run build
 npm run start
 ```
 
-The build script runs database migrations before `next build`.
+The build script currently runs database migrations before `next build` via
+the `prebuild` script. This is intentional for managed Hostinger deployments,
+where a fresh checkout needs the remote libSQL/Turso schema ready before
+Next.js prerenders catalogue pages from the database.
+
+For stricter production control, a safer alternative is to remove `prebuild`
+from the deploy pipeline and run migrations explicitly as a separate release
+step:
+
+```bash
+npm run db:migrate
+npm run build
+```
+
+Use that approach if you need manual migration approval, backups immediately
+before migration, or separate build and release phases.
 
 If Hostinger asks for a port, let the platform provide `PORT`. Next will use it
 when `npm run start` runs.

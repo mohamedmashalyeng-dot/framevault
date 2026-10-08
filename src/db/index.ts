@@ -1,6 +1,6 @@
 import { createClient, type Client } from "@libsql/client";
 import { drizzle, type LibSQLDatabase } from "drizzle-orm/libsql";
-import { env } from "@/server/env";
+import { databaseEnv } from "@/server/env";
 import * as schema from "./schema";
 
 export type Database = LibSQLDatabase<typeof schema>;
@@ -9,7 +9,7 @@ type DbGlobal = { __framevaultDb?: { client: Client; db: Database; url: string }
 const globalForDb = globalThis as unknown as DbGlobal;
 
 function connect(): { client: Client; db: Database; url: string } {
-  const { DATABASE_URL, DATABASE_AUTH_TOKEN } = env();
+  const { DATABASE_URL, DATABASE_AUTH_TOKEN } = databaseEnv();
   const client = createClient({
     url: DATABASE_URL,
     authToken: DATABASE_AUTH_TOKEN,
@@ -21,7 +21,7 @@ function connect(): { client: Client; db: Database; url: string } {
 
 /** Lazily created singleton; reused across hot reloads in development. */
 export function getDb(): Database {
-  const url = env().DATABASE_URL;
+  const url = databaseEnv().DATABASE_URL;
   if (!globalForDb.__framevaultDb || globalForDb.__framevaultDb.url !== url) {
     globalForDb.__framevaultDb = connect();
   }

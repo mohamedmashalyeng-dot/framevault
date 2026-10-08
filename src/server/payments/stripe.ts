@@ -1,5 +1,5 @@
 import Stripe from "stripe";
-import { env } from "../env";
+import { stripeEnv } from "../env";
 import {
   WebhookVerificationError,
   type CheckoutRequest,
@@ -10,8 +10,7 @@ import {
 /**
  * Stripe Checkout (hosted). Prices are sent as inline `price_data` computed on
  * the server from the database, so the browser never supplies an amount.
- * Requires STRIPE_SECRET_KEY and STRIPE_WEBHOOK_SECRET (test-mode keys in
- * development: sk_test_… and the signing secret from `stripe listen`).
+ * Requires STRIPE_SECRET_KEY and STRIPE_WEBHOOK_SECRET on Stripe code paths.
  */
 export class StripeProvider implements PaymentProvider {
   readonly name = "stripe" as const;
@@ -24,13 +23,7 @@ export class StripeProvider implements PaymentProvider {
   }
 
   static fromEnv(): StripeProvider {
-    const { STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, APP_ENV } = env();
-    if (!STRIPE_SECRET_KEY || !STRIPE_WEBHOOK_SECRET) {
-      throw new Error("Stripe is selected but STRIPE_SECRET_KEY / STRIPE_WEBHOOK_SECRET are not set.");
-    }
-    if (APP_ENV !== "production" && STRIPE_SECRET_KEY.startsWith("sk_live_")) {
-      throw new Error("Refusing to use a live Stripe key outside production. Use a test-mode key (sk_test_…).");
-    }
+    const { STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET } = stripeEnv();
     return new StripeProvider(STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET);
   }
 
