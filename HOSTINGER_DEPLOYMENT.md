@@ -78,6 +78,15 @@ npm run build
 npm run start
 ```
 
+If hPanel asks for an application startup file, set it to:
+
+```bash
+server.js
+```
+
+The startup file and `npm run start` both bind Next.js to the `PORT` provided
+by Hostinger and to `0.0.0.0`, which lets Hostinger's proxy reach the app.
+
 The build script currently runs database migrations before `next build` via
 the `prebuild` script. This is intentional for managed Hostinger deployments,
 where a fresh checkout needs the remote libSQL/Turso schema ready before
