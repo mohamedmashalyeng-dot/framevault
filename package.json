@@ -10,7 +10,7 @@
     "dev": "next dev",
     "prebuild": "node \"--import=data:text/javascript,process.geteuid=()=>0\" --import=tsx scripts/migrate.ts",
     "build": "next build --webpack",
-    "start": "node scripts/start-next.mjs",
+    "start": "node server.js",
     "lint": "eslint",
     "typecheck": "next typegen && tsc --noEmit",
     "check": "npm run lint && npm run typecheck && npm test",
