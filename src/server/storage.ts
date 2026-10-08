@@ -22,7 +22,7 @@ export type StorageArea = "private" | "demos" | "media" | "outbox";
 const KEY_PATTERN = /^[a-zA-Z0-9][a-zA-Z0-9._\-/]*$/;
 
 export function storageRoot() {
-  return path.resolve(process.cwd(), env().STORAGE_DIR);
+  return path.resolve(/*turbopackIgnore: true*/ process.cwd(), env().STORAGE_DIR);
 }
 
 /** Resolve a key inside an area, refusing anything that escapes it. */
@@ -30,8 +30,8 @@ export function resolveKey(area: StorageArea, key: string): string {
   if (!KEY_PATTERN.test(key) || key.includes("..") || key.includes("//")) {
     throw new Error("Invalid storage key");
   }
-  const base = path.join(storageRoot(), area);
-  const full = path.resolve(base, key);
+  const base = path.join(/*turbopackIgnore: true*/ storageRoot(), area);
+  const full = path.resolve(/*turbopackIgnore: true*/ base, key);
   if (full !== base && !full.startsWith(base + path.sep)) {
     throw new Error("Invalid storage key");
   }

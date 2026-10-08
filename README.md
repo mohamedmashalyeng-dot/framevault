@@ -177,6 +177,7 @@ file, and a `.env.example` where the project reads environment variables.
 
 - The default database is a local SQLite file. For hosted deployments point
   `DATABASE_URL` at libSQL/Turso (`DATABASE_AUTH_TOKEN`).
+- For Hostinger deployment, see [HOSTINGER_DEPLOYMENT.md](HOSTINGER_DEPLOYMENT.md).
 - File storage (`src/server/storage.ts`) uses the local disk. Serverless hosts
   need persistent storage: swap that module for an S3-compatible
   implementation with the same functions.

@@ -36,6 +36,11 @@ const schema = z.object({
 
   EMAIL_FROM: z.string().default("FRAMEVAULT <no-reply@framevault.local>"),
   RESEND_API_KEY: z.string().optional(),
+
+  SEED_ADMIN_EMAIL: z.string().optional(),
+  SEED_ADMIN_PASSWORD: z.string().optional(),
+  SEED_CUSTOMER_EMAIL: z.string().optional(),
+  SEED_CUSTOMER_PASSWORD: z.string().optional(),
 });
 
 export type ServerEnv = z.infer<typeof schema>;

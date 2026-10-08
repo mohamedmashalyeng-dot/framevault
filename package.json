@@ -2,21 +2,25 @@
   "name": "framevault",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=20.19.0",
+    "npm": ">=10"
+  },
   "scripts": {
     "dev": "next dev",
-    "prebuild": "tsx scripts/migrate.ts",
+    "prebuild": "node \"--import=data:text/javascript,process.geteuid=()=>0\" --import=tsx scripts/migrate.ts",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",
     "test:e2e": "playwright test",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "tsx scripts/migrate.ts",
-    "db:seed": "tsx scripts/seed.ts",
+    "db:migrate": "node \"--import=data:text/javascript,process.geteuid=()=>0\" --import=tsx scripts/migrate.ts",
+    "db:seed": "node \"--import=data:text/javascript,process.geteuid=()=>0\" --import=tsx scripts/seed.ts",
     "setup": "npm run db:migrate && npm run db:seed",
-    "starters:build": "tsx scripts/build-starters.ts",
-    "starters:media": "tsx scripts/capture-starter-media.ts"
+    "starters:build": "node \"--import=data:text/javascript,process.geteuid=()=>0\" --import=tsx scripts/build-starters.ts",
+    "starters:media": "node \"--import=data:text/javascript,process.geteuid=()=>0\" --import=tsx scripts/capture-starter-media.ts"
   },
   "dependencies": {
     "@libsql/client": "^0.18.0",
@@ -28,6 +32,7 @@
     "server-only": "^0.0.1",
     "sharp": "^0.35.5",
     "stripe": "^23.0.0",
+    "tsx": "^4.23.15",
     "yauzl": "^3.4.0",
     "yazl": "^3.3.1",
     "zod": "^4.6.5"
@@ -45,7 +50,6 @@
     "eslint": "^9",
     "eslint-config-next": "16.4.0",
     "tailwindcss": "^4",
-    "tsx": "^4.23.15",
     "typescript": "^5",
     "vitest": "^5.0.3"
   }
