@@ -104,6 +104,11 @@ Entry file: server.js
 The root `server.js` starts Next with Hostinger's `PORT` and binds it to
 `0.0.0.0`, which lets Hostinger's proxy reach the app.
 
+Keep `npm run build` on webpack (`next build --webpack`). Hostinger's build
+environment cannot start the Node worker processes Turbopack uses for CSS
+loaders, so a Turbopack build fails on `globals.css`. Tailwind is wired through
+`postcss.config.mjs`, which both webpack and `next dev` read.
+
 The build script currently runs database migrations before `next build` via
 the `prebuild` script. This is intentional for managed Hostinger deployments,
 where a fresh checkout needs the remote libSQL/Turso schema ready before

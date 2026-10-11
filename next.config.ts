@@ -20,14 +20,6 @@ const nextConfig: NextConfig = {
     serverActions: { bodySizeLimit: "100mb" },
     proxyClientMaxBodySize: "100mb",
   },
-  turbopack: {
-    rules: {
-      "*.css": {
-        loaders: ["@tailwindcss/turbopack"],
-        as: "*.css",
-      },
-    },
-  },
   // Product demos are static files served from private storage by a route
   // handler. They are never bundled or executed by the application server.
   // The key is "/**" (app routes only), not "*": "*" also matches Next's own
