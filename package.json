@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "next dev",
     "prebuild": "node \"--import=data:text/javascript,process.geteuid=()=>0\" --import=tsx scripts/migrate.ts",
-    "build": "next build --webpack",
+    "build": "next build",
     "start": "node server.js",
     "lint": "eslint",
     "typecheck": "next typegen && tsc --noEmit",
