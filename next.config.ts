@@ -30,8 +30,11 @@ const nextConfig: NextConfig = {
   },
   // Product demos are static files served from private storage by a route
   // handler. They are never bundled or executed by the application server.
+  // The key is "/**" (app routes only), not "*": "*" also matches Next's own
+  // "next-server" trace, where excludes match as substrings, so "./data/**"
+  // dropped next/dist/lib/metadata/* and the standalone server failed to boot.
   outputFileTracingExcludes: {
-    "*": ["./storage/**", "./content/**", "./data/**"],
+    "/**": ["./storage/**", "./content/**", "./data/**"],
   },
   async headers() {
     return [

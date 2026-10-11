@@ -51,6 +51,11 @@ EMAIL_FROM=FRAMEVAULT <no-reply@your-domain.com>
 RESEND_API_KEY=
 ```
 
+On the managed Node.js Web App, the app runs from
+`~/domains/<domain>/hbuilds/current/nodejs`, which is replaced on every deploy.
+Set `STORAGE_DIR` to an absolute path outside `hbuilds`, for example
+`/home/<user>/domains/<domain>/storage`, so uploads survive redeploys.
+
 For a test deployment without Stripe, use `APP_ENV=staging` and
 `PAYMENT_PROVIDER=simulated`. Do not use simulated payments for production.
 
