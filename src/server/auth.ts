@@ -68,6 +68,15 @@ function createAuth() {
         "/request-password-reset": { window: 60, max: 5 },
       },
     },
+    advanced: {
+      ipAddress: {
+        // Hostinger's CDN sends a multi-hop X-Forwarded-For, which Better Auth
+        // rejects, but overwrites X-Real-IP with the visitor's address. Without
+        // a usable IP every visitor would share one rate-limit bucket. Any
+        // other reverse proxy in front of the app must set X-Real-IP the same way.
+        ipAddressHeaders: ["x-real-ip", "x-forwarded-for"],
+      },
+    },
     plugins: [nextCookies()],
   });
 }

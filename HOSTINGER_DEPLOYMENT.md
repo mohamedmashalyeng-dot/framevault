@@ -154,6 +154,15 @@ pm2 save
 ```
 
 Configure Nginx to proxy your domain to the app port, then enable HTTPS.
+Pass the visitor's address so sign-in rate limits apply per visitor:
+
+```nginx
+proxy_set_header X-Real-IP $remote_addr;
+```
+
+On the managed Node.js Web App, Hostinger's CDN already sets `X-Real-IP` to
+the visitor's address (a client-supplied value is overwritten), which is the
+header Better Auth reads first.
 
 ## First Production Checklist
 
