@@ -22,7 +22,18 @@ function describeProxyHeaders(request: Request) {
     const shape = ipShape(value);
     if (shape.some((s) => s !== "other")) ipLike[name] = shape;
   }
-  console.warn("[proxy-headers]", JSON.stringify({ names: [...request.headers.keys()], ipLike }));
+  // Positions only: which forwarded entry is the caller (x-fv-me) or a spoofed test value.
+  const xff = (request.headers.get("x-forwarded-for") ?? "").split(",").map((s) => s.trim());
+  const realIp = request.headers.get("x-real-ip");
+  const me = request.headers.get("x-fv-me");
+  const compare = {
+    meIndexInXff: me ? xff.indexOf(me) : null,
+    realIpIndexInXff: realIp ? xff.indexOf(realIp) : null,
+    realIpIsMe: me ? realIp === me : null,
+    realIpIsSpoof: realIp === "198.51.100.9",
+    spoofIndexInXff: xff.indexOf("203.0.113.7"),
+  };
+  console.warn("[proxy-headers]", JSON.stringify({ names: [...request.headers.keys()], ipLike, compare }));
 }
 
 // The auth instance is created lazily so builds do not need runtime secrets.
