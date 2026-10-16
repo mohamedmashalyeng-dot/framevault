@@ -4,7 +4,8 @@ import { connection } from "next/server";
 import { Suspense } from "react";
 import { formatDateTime } from "@/lib/format";
 import { listOutbox } from "@/server/email";
-import { isNonProduction } from "@/server/env";
+import { isLocalEnvironment, isNonProduction } from "@/server/env";
+import { getSessionUser } from "@/server/session";
 
 export const metadata: Metadata = { title: "Development outbox", robots: { index: false, follow: false } };
 
@@ -15,7 +16,7 @@ export default function OutboxPage() {
       <p className="eyebrow text-warning">Development only</p>
       <h1 className="mt-3 text-3xl font-semibold tracking-tight">Email outbox</h1>
       <p className="mt-2 text-muted">
-        Without RESEND_API_KEY, outgoing emails are saved to storage/outbox instead of being sent. This page is unavailable in production.
+        Without RESEND_API_KEY, outgoing emails are saved to storage/outbox instead of being sent. This page is unavailable in production and limited to admins on staging.
       </p>
       <Suspense fallback={<div className="mt-8 h-40 rounded-2xl skeleton" />}>
         <Messages />
@@ -27,6 +28,8 @@ export default function OutboxPage() {
 async function Messages() {
   await connection();
   if (!isNonProduction()) notFound();
+  // Password reset links land here, so on a public (staging) deployment only admins may read them.
+  if (!isLocalEnvironment() && (await getSessionUser())?.role !== "admin") notFound();
   const messages = await listOutbox(30);
   if (messages.length === 0) return <p className="mt-8 rounded-2xl border border-dashed border-line-strong p-8 text-center text-muted">No emails yet.</p>;
 

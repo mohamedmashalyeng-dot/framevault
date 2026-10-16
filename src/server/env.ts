@@ -108,3 +108,9 @@ export function stripeEnv(): StripeEnv {
 export function isNonProduction() {
   return env().APP_ENV !== "production";
 }
+
+/** True for development and test, the only environments not reachable by the public. */
+export function isLocalEnvironment() {
+  const { APP_ENV } = env();
+  return APP_ENV === "development" || APP_ENV === "test";
+}

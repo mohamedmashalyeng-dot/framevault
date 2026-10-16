@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { AuthShell } from "@/components/auth/AuthShell";
 import { ForgotPasswordForm } from "@/components/auth/PasswordResetForms";
-import { isNonProduction } from "@/server/env";
+import { isLocalEnvironment } from "@/server/env";
 
 export const metadata: Metadata = { title: "Reset password", robots: { index: false } };
 
@@ -17,7 +17,7 @@ export default function ForgotPasswordPage() {
         </Link>
       }
     >
-      <ForgotPasswordForm showDevOutbox={isNonProduction()} />
+      <ForgotPasswordForm showDevOutbox={isLocalEnvironment()} />
     </AuthShell>
   );
 }
