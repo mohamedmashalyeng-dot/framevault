@@ -1,7 +1,12 @@
 import Link from "next/link";
 import { ArrowRight, ArrowUpRight } from "@/components/icons";
 import { MediaImage, PosterPlaceholder } from "@/components/MediaImage";
+import { HeroRays } from "@/components/motion/HeroRays";
+import { ScrollReveal } from "@/components/motion/ScrollReveal";
+import { StarLink } from "@/components/motion/StarLink";
 import { PriceTag, ProductCard } from "@/components/ProductCard";
+import BlurText from "@/components/reactbits/BlurText";
+import CountUp from "@/components/reactbits/CountUp";
 import { BRAND } from "@/config/brand";
 import { formatPrice } from "@/lib/money";
 import { cachedFacets, cachedFeatured, cachedRecent, cachedStoreSettings } from "@/server/catalogue/cached";
@@ -46,21 +51,38 @@ export default async function HomePage() {
 
   return (
     <>
+      <ScrollReveal />
+
       {/* Hero */}
-      <section className="border-b border-line">
+      <section className="relative isolate overflow-hidden border-b border-line">
+        <HeroRays />
         <div className="mx-auto grid max-w-7xl gap-10 px-4 pb-14 pt-14 sm:px-6 md:pt-20 lg:grid-cols-[1.15fr_1fr] lg:items-end lg:pb-20">
           <div className="animate-fade-up">
             <p className="eyebrow">Templates · Components · Sections · AI prompts</p>
-            <h1 className="mt-5 max-w-3xl text-display font-semibold">
-              Interfaces that look <span className="text-mint">finished</span> on day one.
-            </h1>
+            <BlurText
+              as="h1"
+              text="Interfaces that look finished on day one."
+              highlight={["finished"]}
+              highlightClassName="text-mint"
+              trigger="load"
+              direction="bottom"
+              distance={18}
+              blur={8}
+              delay={70}
+              stepDuration={0.4}
+              className="mt-5 max-w-3xl text-display font-semibold"
+            />
+            {/* Without JavaScript the heading's words would stay at their blurred starting frame. */}
+            <noscript>
+              <style>{`.blur-text [aria-hidden]{opacity:1!important;filter:none!important;transform:none!important}`}</style>
+            </noscript>
             <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted">
               Preview every product live, buy only what you need, then copy its prompt or download versioned source code.
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-3">
-              <Link href="/catalogue" className="btn btn-primary">
+              <StarLink href="/catalogue">
                 Explore templates <ArrowRight />
-              </Link>
+              </StarLink>
               <Link href="#how-it-works" className="btn btn-ghost">
                 How it works
               </Link>
@@ -76,7 +98,7 @@ export default async function HomePage() {
           <h2 id="categories-title" className="sr-only">
             Browse by category
           </h2>
-          <ul className="grid grid-cols-2 gap-x-6 sm:grid-cols-3 lg:grid-cols-5 lg:gap-x-0">
+          <ul data-reveal-children className="grid grid-cols-2 gap-x-6 sm:grid-cols-3 lg:grid-cols-5 lg:gap-x-0">
             {facets.categories.map((c) => (
               <li key={c.slug} className="border-b border-line lg:border-b-0 lg:border-r lg:last:border-r-0 lg:first:[&>a]:pl-0">
                 <Link
@@ -86,7 +108,7 @@ export default async function HomePage() {
                   <span>
                     <span className="block font-medium tracking-tight">{c.name}</span>
                     <span className="mt-1 block font-mono text-xs text-subtle">
-                      {c.count} {c.count === 1 ? "product" : "products"}
+                      <CountUp to={c.count} duration={1.2} /> {c.count === 1 ? "product" : "products"}
                     </span>
                   </span>
                   <ArrowUpRight className="shrink-0 text-subtle transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-mint" />
@@ -100,8 +122,10 @@ export default async function HomePage() {
       {/* Featured */}
       {rest.length > 0 && (
         <section aria-labelledby="featured-title" className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 md:py-20">
-          <SectionHeading id="featured-title" eyebrow="Featured" title="Hand-picked this month" href="/catalogue" linkLabel="View all" />
-          <div className="mt-10 grid gap-x-6 gap-y-10 md:grid-cols-2 lg:grid-cols-3">
+          <div data-reveal>
+            <SectionHeading id="featured-title" eyebrow="Featured" title="Hand-picked this month" href="/catalogue" linkLabel="View all" />
+          </div>
+          <div data-reveal-children className="mt-10 grid gap-x-6 gap-y-10 md:grid-cols-2 lg:grid-cols-3">
             {rest.map((p) => (
               <ProductCard key={p.id} product={p} currency={currency} />
             ))}
@@ -112,11 +136,13 @@ export default async function HomePage() {
       {/* How it works */}
       <section id="how-it-works" aria-labelledby="how-title" className="border-y border-line bg-graphite-900/60">
         <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 md:py-20">
-          <p className="eyebrow">How it works</p>
-          <h2 id="how-title" className="mt-3 max-w-xl text-3xl font-semibold tracking-tight md:text-4xl">
-            Preview, purchase, then copy or download.
-          </h2>
-          <ol className="mt-12 grid gap-px overflow-hidden rounded-2xl border border-line bg-line md:grid-cols-3">
+          <div data-reveal>
+            <p className="eyebrow">How it works</p>
+            <h2 id="how-title" className="mt-3 max-w-xl text-3xl font-semibold tracking-tight md:text-4xl">
+              Preview, purchase, then copy or download.
+            </h2>
+          </div>
+          <ol data-reveal-children className="mt-12 grid gap-px overflow-hidden rounded-2xl border border-line bg-line md:grid-cols-3">
             {[
               ["01", "Preview it live", "Open the interactive demo in a sandbox, switch device widths and read exactly what is included before you pay."],
               ["02", "Purchase once", "Checkout is handled by the payment provider. Access unlocks only after the payment is confirmed."],
@@ -135,14 +161,16 @@ export default async function HomePage() {
       {/* Recently added */}
       {recent.length > 0 && (
         <section aria-labelledby="recent-title" className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 md:py-20">
-          <SectionHeading
-            id="recent-title"
-            eyebrow="Recently added"
-            title="New in the catalogue"
-            href="/catalogue?sort=newest"
-            linkLabel="Browse newest"
-          />
-          <ul className="mt-8 divide-y divide-line border-y border-line">
+          <div data-reveal>
+            <SectionHeading
+              id="recent-title"
+              eyebrow="Recently added"
+              title="New in the catalogue"
+              href="/catalogue?sort=newest"
+              linkLabel="Browse newest"
+            />
+          </div>
+          <ul data-reveal-children className="mt-8 divide-y divide-line border-y border-line">
             {recent.map((p) => (
               <RecentRow key={p.id} product={p} currency={currency} />
             ))}
@@ -153,7 +181,7 @@ export default async function HomePage() {
       {/* All-access */}
       {settings.allAccess.enabled && (
         <section aria-labelledby="all-access-title" className="mx-auto w-full max-w-7xl px-4 pb-16 sm:px-6 md:pb-20">
-          <div className="flex flex-col gap-6 rounded-2xl border border-line bg-graphite-900 p-7 md:flex-row md:items-center md:justify-between md:p-10">
+          <div data-reveal className="flex flex-col gap-6 rounded-2xl border border-line bg-graphite-900 p-7 md:flex-row md:items-center md:justify-between md:p-10">
             <div>
               <p className="eyebrow">One-time purchase</p>
               <h2 id="all-access-title" className="mt-3 text-2xl font-semibold tracking-tight md:text-3xl">
@@ -173,7 +201,7 @@ export default async function HomePage() {
 
       {/* FAQ */}
       <section id="faq" aria-labelledby="faq-title" className="border-t border-line">
-        <div className="mx-auto grid max-w-7xl gap-10 px-4 py-16 sm:px-6 md:py-20 lg:grid-cols-[1fr_2fr]">
+        <div data-reveal-children className="mx-auto grid max-w-7xl gap-10 px-4 py-16 sm:px-6 md:py-20 lg:grid-cols-[1fr_2fr]">
           <div>
             <p className="eyebrow">FAQ</p>
             <h2 id="faq-title" className="mt-3 text-3xl font-semibold tracking-tight">

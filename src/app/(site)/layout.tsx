@@ -1,3 +1,4 @@
+import { SmoothScroll } from "@/components/motion/SmoothScroll";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { SiteHeader } from "@/components/site/SiteHeader";
 
@@ -10,6 +11,7 @@ export default function SiteLayout({ children }: LayoutProps<"/">) {
       >
         Skip to content
       </a>
+      <SmoothScroll />
       <SiteHeader />
       <main id="main" className="flex flex-1 flex-col">
         {children}
