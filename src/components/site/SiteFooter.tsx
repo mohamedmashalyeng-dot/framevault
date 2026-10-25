@@ -19,6 +19,7 @@ const COLUMNS = [
       ["/catalogue?price=free", "Free products"],
       ["/all-access", "All-access"],
       ["/licence", "Licence"],
+      ["/my-works", "My works"],
       ["/#faq", "FAQ"],
     ],
   },

@@ -11,6 +11,7 @@ const NAV = [
   { href: "/catalogue?category=full-websites", label: "Websites" },
   { href: "/catalogue?category=components", label: "Components" },
   { href: "/all-access", label: "All-access" },
+  { href: "/my-works", label: "My works" },
 ];
 
 export function SiteHeader() {
