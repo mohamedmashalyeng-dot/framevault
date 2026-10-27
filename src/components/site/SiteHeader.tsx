@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { getSessionUser } from "@/server/session";
 import { Menu, Search } from "../icons";
 import { Logo } from "../Logo";
+import { MenuDetails } from "./MenuDetails";
 import { SignOutButton } from "./SignOutButton";
 
 const NAV = [
@@ -71,7 +72,7 @@ async function AccountArea() {
   }
   const initial = (user.name || user.email).trim().charAt(0).toUpperCase();
   return (
-    <details className="group relative">
+    <MenuDetails className="group relative">
       <summary
         className="flex h-9 cursor-pointer list-none items-center gap-2 rounded-full border border-line pl-1 pr-3 text-sm hover:border-line-strong [&::-webkit-details-marker]:hidden"
         aria-label="Account menu"
@@ -95,13 +96,13 @@ async function AccountArea() {
         <div className="my-1 border-t border-line" />
         <SignOutButton className="block w-full rounded-lg px-3 py-2 text-left text-sm text-paper-dim hover:bg-white/[0.05] hover:text-paper" />
       </div>
-    </details>
+    </MenuDetails>
   );
 }
 
 function MobileMenu() {
   return (
-    <details className="relative lg:hidden">
+    <MenuDetails className="relative lg:hidden">
       <summary
         className="grid size-9 cursor-pointer list-none place-items-center rounded-full border border-line hover:border-line-strong [&::-webkit-details-marker]:hidden"
         aria-label="Open navigation"
@@ -123,6 +124,6 @@ function MobileMenu() {
           ))}
         </nav>
       </div>
-    </details>
+    </MenuDetails>
   );
 }

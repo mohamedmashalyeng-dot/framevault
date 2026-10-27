@@ -18,6 +18,17 @@ test.describe("accounts and permissions", () => {
 
     await signIn(page, account);
     await expect(page.getByRole("heading", { name: "Library" })).toBeVisible();
+
+    // The account menu closes after following a link and on Escape.
+    const banner = page.getByRole("banner");
+    await banner.getByLabel("Account menu").click();
+    await banner.getByRole("link", { name: "Favourites" }).click();
+    await expect(page).toHaveURL(/\/account\/favourites$/);
+    await expect(banner.getByRole("link", { name: "Orders" })).toBeHidden();
+    await banner.getByLabel("Account menu").click();
+    await expect(banner.getByRole("link", { name: "Orders" })).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(banner.getByRole("link", { name: "Orders" })).toBeHidden();
   });
 
   test("validates auth forms and rejects wrong passwords", async ({ page }) => {

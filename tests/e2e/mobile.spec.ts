@@ -15,6 +15,8 @@ test.describe("mobile layouts", () => {
     await page.getByLabel("Open navigation").click();
     await page.getByRole("navigation", { name: "Mobile" }).getByRole("link", { name: "Components" }).click();
     await expect(page).toHaveURL(/category=components/);
+    // The menu closes after navigating instead of covering the next page.
+    await expect(page.getByRole("navigation", { name: "Mobile" })).toBeHidden();
 
     await page.locator("summary", { hasText: "Filters" }).click();
     await page.locator("details").getByRole("link", { name: /^Free/ }).click();
