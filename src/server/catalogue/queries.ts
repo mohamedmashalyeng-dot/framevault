@@ -3,7 +3,7 @@ import { getDb } from "@/db";
 import { category, product, productMedia, productTag, productVersion, tag } from "@/db/schema";
 import type { CatalogueQuery } from "@/lib/catalogue-params";
 import { PAGE_SIZE } from "@/lib/catalogue-params";
-import type { MediaRef } from "@/lib/media";
+import { videoUrl, type MediaRef } from "@/lib/media";
 import { toFtsQuery } from "./search-index";
 
 /**
@@ -16,11 +16,15 @@ export type ProductSummary = {
   slug: string;
   title: string;
   tagline: string;
+  /** Tagline, or the start of the description when there is none. */
+  excerpt: string;
   priceCents: number;
   category: { slug: string; name: string };
   technologies: string[];
   styles: string[];
   poster: MediaRef | null;
+  /** URL of the preview clip, if the product has one. */
+  video: string | null;
   hasSource: boolean;
   hasPrompt: boolean;
   publishedAt: string | null;
@@ -39,7 +43,9 @@ const summaryColumns = {
   slug: product.slug,
   title: product.title,
   tagline: product.tagline,
+  descriptionStart: sql<string>`substr(${product.description}, 1, 280)`,
   priceCents: product.priceCents,
+  videoKey: product.videoKey,
   publishedAt: product.publishedAt,
   categorySlug: category.slug,
   categoryName: category.name,
@@ -52,7 +58,9 @@ type SummaryRow = {
   slug: string;
   title: string;
   tagline: string;
+  descriptionStart: string;
   priceCents: number;
+  videoKey: string | null;
   publishedAt: Date | null;
   categorySlug: string;
   categoryName: string;
@@ -95,6 +103,7 @@ async function hydrate(rows: SummaryRow[]): Promise<ProductSummary[]> {
       slug: r.slug,
       title: r.title,
       tagline: r.tagline,
+      excerpt: r.tagline || r.descriptionStart.split(/\n{2,}/)[0],
       priceCents: r.priceCents,
       category: { slug: r.categorySlug, name: r.categoryName },
       technologies: tagRows.filter((t) => t.productId === r.id && t.kind === "technology").map((t) => t.name),
@@ -102,6 +111,7 @@ async function hydrate(rows: SummaryRow[]): Promise<ProductSummary[]> {
       poster: poster
         ? { key: poster.storageKey, widths: poster.widths, width: poster.width, height: poster.height, alt: poster.alt }
         : null,
+      video: r.videoKey ? videoUrl(r.videoKey) : null,
       hasSource: Boolean(r.hasSource),
       hasPrompt: Boolean(r.hasPrompt),
       publishedAt: r.publishedAt ? r.publishedAt.toISOString() : null,
@@ -233,6 +243,7 @@ export type ProductDetail = {
   styles: { slug: string; name: string }[];
   topics: { slug: string; name: string }[];
   poster: MediaRef | null;
+  video: string | null;
   screenshots: MediaRef[];
   publishedAt: string | null;
   updatedAt: string;
@@ -337,6 +348,7 @@ export async function getProductDetail(slug: string): Promise<ProductDetail | nu
     styles: tags.filter((t) => t.kind === "style"),
     topics: tags.filter((t) => t.kind === "topic"),
     poster: media.find((m) => m.kind === "poster") ? toRef(media.find((m) => m.kind === "poster")!) : null,
+    video: p.videoKey ? videoUrl(p.videoKey) : null,
     screenshots: media.filter((m) => m.kind === "screenshot").map(toRef),
     publishedAt: p.publishedAt ? p.publishedAt.toISOString() : null,
     updatedAt: p.updatedAt.toISOString(),

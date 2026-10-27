@@ -22,3 +22,7 @@ export function mediaFallback(media: MediaRef): string {
 export function ogImageUrl(key: string): string {
   return `/media/${key}-og.jpg`;
 }
+
+export function videoUrl(key: string): string {
+  return `/media/${key}`;
+}

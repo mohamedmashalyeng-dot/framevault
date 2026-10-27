@@ -64,8 +64,8 @@ export async function statObject(area: StorageArea, key: string) {
   }
 }
 
-export function streamObject(area: StorageArea, key: string): ReadableStream<Uint8Array> {
-  const nodeStream = createReadStream(resolveKey(area, key));
+export function streamObject(area: StorageArea, key: string, range?: { start: number; end: number }): ReadableStream<Uint8Array> {
+  const nodeStream = createReadStream(resolveKey(area, key), range);
   return Readable.toWeb(nodeStream) as ReadableStream<Uint8Array>;
 }
 

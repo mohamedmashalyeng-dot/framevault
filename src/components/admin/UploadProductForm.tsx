@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import type { AdminFormState } from "@/server/actions/admin";
 import { Spinner } from "../icons";
 import { FormStatus } from "./ActionButton";
@@ -26,7 +26,49 @@ function Step({ n, title, hint, children }: { n: number; title: string; hint?: s
   );
 }
 
-/** One form for everything: details, preview images, source ZIP, demo and prompt. */
+function waitFor(video: HTMLVideoElement, event: string, ms: number) {
+  return new Promise<void>((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error(`Timed out waiting for ${event}.`)), ms);
+    video.addEventListener(event, () => (clearTimeout(timer), resolve()), { once: true });
+    video.addEventListener("error", () => (clearTimeout(timer), reject(new Error("The video could not be decoded."))), { once: true });
+  });
+}
+
+/**
+ * Grabs a frame about a second into the clip as a JPEG poster, scaled up to
+ * the 1200 px minimum when the video is smaller. Runs in the browser, since
+ * the server has no video decoder.
+ */
+async function posterFromVideo(file: File): Promise<File> {
+  const url = URL.createObjectURL(file);
+  const video = document.createElement("video");
+  video.muted = true;
+  video.playsInline = true;
+  video.preload = "auto";
+  video.src = url;
+  try {
+    await waitFor(video, "loadeddata", 15_000);
+    // Skip the opening frame (often black) when the length is known. Browser
+    // recordings without a duration may not seek, so they keep the first frame.
+    if (Number.isFinite(video.duration) && video.duration > 0) {
+      video.currentTime = Math.min(1, video.duration / 3);
+      await waitFor(video, "seeked", 5_000).catch(() => {});
+    }
+    const scale = Math.max(1, 1200 / video.videoWidth);
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.round(video.videoWidth * scale);
+    canvas.height = Math.round(video.videoHeight * scale);
+    canvas.getContext("2d")!.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.9));
+    if (!blob) throw new Error("The frame could not be encoded.");
+    return new File([blob], "poster.jpg", { type: "image/jpeg" });
+  } finally {
+    video.removeAttribute("src");
+    URL.revokeObjectURL(url);
+  }
+}
+
+/** One form for everything: video, details, preview images, source ZIP, demo and prompt. */
 export function UploadProductForm({
   action,
   categories,
@@ -36,25 +78,89 @@ export function UploadProductForm({
   categories: { id: string; name: string }[];
   tagSuggestions: { technology: string[]; style: string[]; topic: string[] };
 }) {
-  const [state, run, pending] = useActionState(action, { error: null, success: null });
+  const [state, run, pending] = useActionState(async (prev: AdminFormState, data: FormData): Promise<AdminFormState> => {
+    const video = data.get("video");
+    const poster = data.get("poster");
+    if (video instanceof File && video.size > 0 && !(poster instanceof File && poster.size > 0)) {
+      try {
+        data.set("poster", await posterFromVideo(video));
+      } catch {
+        return { error: "Your browser could not take a poster frame from this video. Upload a poster image instead.", success: null };
+      }
+    }
+    return action(prev, data);
+  }, { error: null, success: null });
   const [hasArchive, setHasArchive] = useState(false);
   const [hasDemo, setHasDemo] = useState(false);
+  const [videoPreview, setVideoPreview] = useState<string | null>(null);
+
+  useEffect(() => () => {
+    if (videoPreview) URL.revokeObjectURL(videoPreview);
+  }, [videoPreview]);
 
   return (
-    <form action={run} className="space-y-6">
-      <Step n={1} title="Product details" hint="What customers see in the catalogue and on the product page.">
+    <form
+      action={run}
+      // React clears the file inputs after each submit; keep the dependent UI in step.
+      onReset={() => {
+        setHasArchive(false);
+        setHasDemo(false);
+        setVideoPreview(null);
+      }}
+      className="space-y-6"
+    >
+      <Step n={1} title="Preview video" hint="MP4 or WebM, up to 50 MB. It plays on the product card and in the quick-view pop-up.">
+        <div>
+          <label htmlFor="video" className="label">
+            Video
+          </label>
+          <input
+            id="video"
+            name="video"
+            type="file"
+            accept="video/mp4,video/webm"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              setVideoPreview(file ? URL.createObjectURL(file) : null);
+            }}
+            className={fileInput}
+          />
+          <p className="mt-1 text-xs text-subtle">Short, silent loops work best. Without a video, the card shows the poster image.</p>
+        </div>
+        {videoPreview && (
+          <video
+            src={videoPreview}
+            muted
+            loop
+            autoPlay
+            playsInline
+            controls
+            aria-label="Selected video"
+            className="aspect-video w-full rounded-xl border border-line bg-black object-contain"
+          />
+        )}
+      </Step>
+
+      <Step n={2} title="Product details" hint="Title, description and price: what customers see in the catalogue and on the product page.">
         <div className="space-y-6">
           <ProductFields categories={categories} initial={EMPTY_PRODUCT} tagSuggestions={tagSuggestions} />
         </div>
       </Step>
 
-      <Step n={2} title="Preview images" hint="JPEG, PNG, WebP or AVIF, up to 10 MB each. A screenshot of the live project works best.">
+      <Step n={3} title="Preview images" hint="JPEG, PNG, WebP or AVIF, up to 10 MB each. A screenshot of the live project works best.">
         <div className="grid gap-5 md:grid-cols-2">
           <div>
             <label htmlFor="poster" className="label">
-              Poster (required, cropped to 16:10, at least 1200 px wide)
+              {videoPreview ? "Poster (optional: a frame from the video is used otherwise)" : "Poster (required, cropped to 16:10, at least 1200 px wide)"}
             </label>
-            <input id="poster" name="poster" type="file" required accept="image/jpeg,image/png,image/webp,image/avif" className={fileInput} />
+            <input
+              id="poster"
+              name="poster"
+              type="file"
+              required={!videoPreview}
+              accept="image/jpeg,image/png,image/webp,image/avif"
+              className={fileInput}
+            />
           </div>
           <div>
             <label htmlFor="posterAlt" className="label">
@@ -72,7 +178,7 @@ export function UploadProductForm({
       </Step>
 
       <Step
-        n={3}
+        n={4}
         title="Source code and live demo"
         hint="The source ZIP is stored privately and only delivered to customers with access. The demo is public and runs in a sandbox."
       >
@@ -125,7 +231,7 @@ export function UploadProductForm({
         </label>
       </Step>
 
-      <Step n={4} title="AI prompt" hint="Protected: only shown to customers with access, never in public pages.">
+      <Step n={5} title="AI prompt" hint="Protected: only shown to customers with access, never in public pages.">
         <div>
           <label htmlFor="prompt" className="label">
             Prompt {hasArchive ? "(optional)" : "(required without a source ZIP)"}
@@ -134,7 +240,7 @@ export function UploadProductForm({
         </div>
       </Step>
 
-      <Step n={5} title="Release">
+      <Step n={6} title="Release">
         <div className="grid gap-5 md:grid-cols-[10rem_1fr]">
           <div>
             <label htmlFor="version" className="label">

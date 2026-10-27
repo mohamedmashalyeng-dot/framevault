@@ -47,6 +47,38 @@ export function MediaUploadForm({ action }: { action: (prev: AdminFormState, dat
   );
 }
 
+export function VideoUploadForm({
+  action,
+  hasVideo,
+}: {
+  action: (prev: AdminFormState, data: FormData) => Promise<AdminFormState>;
+  hasVideo: boolean;
+}) {
+  const formRef = useRef<HTMLFormElement>(null);
+  const [state, run, pending] = useActionState(async (prev: AdminFormState, data: FormData) => {
+    const result = await action(prev, data);
+    if (result.success) formRef.current?.reset();
+    return result;
+  }, INITIAL);
+
+  return (
+    <form ref={formRef} action={run} className="grid gap-4 rounded-xl border border-line p-4 md:grid-cols-[1fr_auto] md:items-end">
+      <div>
+        <label htmlFor="video-file" className="label">
+          {hasVideo ? "Replace video" : "Video"} (MP4 or WebM · max 50 MB)
+        </label>
+        <input id="video-file" name="video" type="file" required accept="video/mp4,video/webm" className="field py-2 text-sm file:mr-3 file:rounded-full file:border-0 file:bg-graphite-700 file:px-3 file:py-1 file:text-paper" />
+      </div>
+      <button type="submit" disabled={pending} className="btn btn-secondary">
+        {pending ? "Uploading…" : "Upload video"}
+      </button>
+      <div className="md:col-span-2">
+        <FormStatus state={state} />
+      </div>
+    </form>
+  );
+}
+
 export function NewVersionForm({
   action,
   suggestedVersion,

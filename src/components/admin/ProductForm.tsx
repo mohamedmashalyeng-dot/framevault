@@ -44,8 +44,7 @@ type FieldProps = {
 
 /** Product detail inputs, shared by the edit form and the one-page upload form. */
 export function ProductFields({ categories, initial, tagSuggestions }: FieldProps) {
-  const [price, setPrice] = useState(initial.price);
-  const free = Number.parseFloat(price || "0") === 0;
+  const [free, setFree] = useState(!(Number.parseFloat(initial.price || "0") > 0));
 
   return (
     <>
@@ -95,6 +94,32 @@ export function ProductFields({ categories, initial, tagSuggestions }: FieldProp
 
       <fieldset className="grid gap-5 rounded-xl border border-line p-4 md:grid-cols-3">
         <legend className="px-1 text-sm font-medium">Pricing and licence</legend>
+        <div role="radiogroup" aria-label="Pricing" className="grid grid-cols-2 gap-2 md:col-span-3">
+          {(
+            [
+              ["free", "Free", "Anyone can copy the prompt."],
+              ["premium", "Premium", "Customers buy it. Marked Premium in the store."],
+            ] as const
+          ).map(([value, label, hint]) => (
+            <label
+              key={value}
+              className="flex cursor-pointer items-start gap-2.5 rounded-lg border border-line p-3 text-sm has-[:checked]:border-mint/60 has-[:checked]:bg-mint/5"
+            >
+              <input
+                type="radio"
+                name="pricing"
+                value={value}
+                checked={free === (value === "free")}
+                onChange={() => setFree(value === "free")}
+                className="mt-0.5 size-4 accent-[var(--color-mint)]"
+              />
+              <span>
+                <span className="font-medium">{label}</span>
+                <span className="block text-xs text-subtle">{hint}</span>
+              </span>
+            </label>
+          ))}
+        </div>
         <div>
           <label htmlFor="price" className="label">
             Price
@@ -103,12 +128,14 @@ export function ProductFields({ categories, initial, tagSuggestions }: FieldProp
             id="price"
             name="price"
             inputMode="decimal"
-            value={price}
-            onChange={(e) => setPrice(e.target.value)}
+            required={!free}
+            disabled={free}
+            defaultValue={Number.parseFloat(initial.price || "0") > 0 ? initial.price : ""}
+            placeholder={free ? "Free" : "e.g. 29"}
             pattern="\d{1,5}(\.\d{1,2})?"
+            title="A number, for example 29 or 29.00"
             className="field font-mono"
           />
-          <p className="mt-1 text-xs text-subtle">0 makes the product free.</p>
         </div>
         <div>
           <label htmlFor="licenceType" className="label">

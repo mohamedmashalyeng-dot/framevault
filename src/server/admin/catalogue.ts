@@ -19,6 +19,7 @@ import { refreshSearchIndex } from "../catalogue/search-index";
 import { newId } from "../ids";
 import { removeDemo } from "../ingest/demo";
 import { removePreviewImage, storePreviewImage } from "../ingest/media";
+import { removePreviewVideo, storePreviewVideo } from "../ingest/video";
 import { DEFAULT_LICENCE_SUMMARY } from "../licence";
 import { removePrefix } from "../storage";
 import { contains } from "./search";
@@ -276,6 +277,7 @@ export async function deleteDraftProduct(id: string) {
     if (v.demoKey) await removeDemo(v.demoKey);
   }
   for (const m of media) await removePreviewImage(m.storageKey, m.widths);
+  if (current.videoKey) await removePreviewVideo(current.videoKey);
   await refreshSearchIndex(id);
 }
 
@@ -499,6 +501,24 @@ export async function removeProductMedia(mediaId: string) {
   await db.delete(productMedia).where(eq(productMedia.id, mediaId));
   await removePreviewImage(m.storageKey, m.widths);
   return m.productId;
+}
+
+/** Stores a new preview clip and drops the one it replaces. */
+export async function setProductVideo(productId: string, data: Buffer) {
+  const db = getDb();
+  const [p] = await db.select({ videoKey: product.videoKey }).from(product).where(eq(product.id, productId));
+  if (!p) throw new AdminInputError("Product not found.");
+  const key = await storePreviewVideo(data, productId);
+  await db.update(product).set({ videoKey: key }).where(eq(product.id, productId));
+  if (p.videoKey) await removePreviewVideo(p.videoKey);
+}
+
+export async function removeProductVideo(productId: string) {
+  const db = getDb();
+  const [p] = await db.select({ videoKey: product.videoKey }).from(product).where(eq(product.id, productId));
+  if (!p?.videoKey) return;
+  await db.update(product).set({ videoKey: null }).where(eq(product.id, productId));
+  await removePreviewVideo(p.videoKey);
 }
 
 export async function productsUsingTags(tagIds: string[]) {

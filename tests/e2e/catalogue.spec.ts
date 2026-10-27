@@ -69,11 +69,31 @@ test.describe("catalogue", () => {
     await expect(page.locator("article")).toHaveCount(total - 12);
   });
 
-  test("product cards link to detail pages", async ({ page }) => {
+  test("premium cards open a quick view with buy now and a link to the detail page", async ({ page }) => {
     await page.goto("/catalogue?category=components");
+    await expect(page.locator("article", { hasText: "Tally Pricing Component" })).toContainText("Premium");
     await page.getByRole("link", { name: "Tally Pricing Component" }).click();
+    const dialog = page.getByRole("dialog", { name: "Tally Pricing Component" });
+    await expect(dialog).toBeVisible();
+    await expect(dialog.getByRole("button", { name: /^Buy now · \$12/ })).toBeVisible();
+    await expect(dialog.getByRole("button", { name: "Copy prompt" })).toHaveCount(0);
+    await dialog.getByRole("link", { name: "View details" }).click();
     await expect(page).toHaveURL(/\/products\/tally-pricing$/);
     await expect(page.getByRole("heading", { level: 1, name: "Tally Pricing Component" })).toBeVisible();
+  });
+
+  test("free cards copy the prompt from the quick view", async ({ page, context }) => {
+    await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+    await page.goto("/catalogue?category=sections");
+    await expect(page.locator("article", { hasText: "Bento Feature Grid" })).not.toContainText("Premium");
+    await page.getByRole("link", { name: "Bento Feature Grid" }).click();
+    const dialog = page.getByRole("dialog", { name: "Bento Feature Grid" });
+    await expect(dialog.getByRole("button", { name: /Buy now/ })).toHaveCount(0);
+    await dialog.getByRole("button", { name: "Copy prompt" }).click();
+    await expect(dialog.getByRole("button", { name: "Copied" })).toBeVisible();
+    expect(await page.evaluate(() => navigator.clipboard.readText())).toContain('Build "Bento"');
+    await page.keyboard.press("Escape");
+    await expect(dialog).toBeHidden();
   });
 
   test("sitemap and robots exclude private areas", async ({ request }) => {

@@ -16,8 +16,8 @@ export default function UploadProductPage() {
       </Link>
       <h1 className="mt-3 text-3xl font-semibold tracking-tight">Upload a product</h1>
       <p className="mt-2 text-muted">
-        Everything in one place: details, preview images, the source code ZIP, a live demo and the AI prompt. Files are checked
-        before anything is saved.
+        Everything in one place: preview video, details and price, preview images, the source code ZIP, a live demo and the AI
+        prompt. Files are checked before anything is saved.
       </p>
       <div className="mt-8">
         <Suspense fallback={<div className="h-96 rounded-2xl skeleton" />}>

@@ -1,0 +1,1 @@
+ALTER TABLE `product` ADD `video_key` text;

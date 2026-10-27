@@ -17,9 +17,11 @@ import {
   getProductForAdmin,
   releaseVersion,
   removeProductMedia,
+  removeProductVideo,
   renameTag,
   saveCategory,
   setProductStatus,
+  setProductVideo,
   updateProduct,
   updateVersionText,
   type ProductInput,
@@ -29,6 +31,7 @@ import { CATALOGUE_TAG, SETTINGS_TAG } from "../catalogue/cached";
 import { storeSourceArchive, validateSourceArchive } from "../ingest/archive";
 import { installDemoFromZip, removeDemo, validateDemoZip } from "../ingest/demo";
 import { ImageValidationError } from "../ingest/media";
+import { validatePreviewVideo, VideoValidationError } from "../ingest/video";
 import { readZipEntry, ZipValidationError } from "../ingest/zip";
 import { refundOrder } from "../orders";
 import { ForbiddenError, requireAdminAction } from "../session";
@@ -45,7 +48,12 @@ export type AdminFormState = { error: string | null; success: string | null };
 const ok = (success: string): AdminFormState => ({ error: null, success });
 
 function failure(error: unknown): AdminFormState {
-  if (error instanceof AdminInputError || error instanceof ZipValidationError || error instanceof ImageValidationError) {
+  if (
+    error instanceof AdminInputError ||
+    error instanceof ZipValidationError ||
+    error instanceof ImageValidationError ||
+    error instanceof VideoValidationError
+  ) {
     return { error: error.message, success: null };
   }
   if (error instanceof ForbiddenError) return { error: error.message, success: null };
@@ -65,8 +73,10 @@ const list = (value: string) =>
     .filter(Boolean);
 
 function readProductForm(data: FormData): ProductInput {
-  const price = parsePriceInput(text(data, "price") || "0");
+  const premium = text(data, "pricing") === "premium";
+  const price = premium ? parsePriceInput(text(data, "price")) : 0;
   if (price === null) throw new AdminInputError("Enter the price as a number, for example 29 or 29.00.");
+  if (premium && price === 0) throw new AdminInputError("Enter a price for a premium product, or choose Free.");
   return {
     title: text(data, "title"),
     slug: text(data, "slug") || undefined,
@@ -151,6 +161,7 @@ export async function uploadProductAction(_prev: AdminFormState, data: FormData)
     const poster = await readUpload(data, "poster");
     if (!poster) throw new AdminInputError("Add a poster image so the product has a preview in the catalogue.");
     const screenshots = await readUploads(data, "screenshots", 6);
+    const video = await readUpload(data, "video");
     const archiveUpload = await readUpload(data, "archive");
     const demoUpload = await readUpload(data, "demo");
     const useSourceAsDemo = data.get("useSourceAsDemo") === "on";
@@ -159,11 +170,13 @@ export async function uploadProductAction(_prev: AdminFormState, data: FormData)
     if (useSourceAsDemo && !archiveUpload) throw new AdminInputError("Upload the source code ZIP to use it as the live demo.");
 
     // Validate every file first so a bad upload never leaves a half-made product.
+    if (video) validatePreviewVideo(video.buffer);
     if (archiveUpload) await validateSourceArchive(archiveUpload.buffer);
     if (demoUpload) await validateDemoZip(demoUpload.buffer);
     else if (useSourceAsDemo) await validateDemoZip(archiveUpload!.buffer, { skipUnsupported: true });
 
     productId = await createProduct(input);
+    if (video) await setProductVideo(productId, video.buffer);
     await addProductMedia(productId, "poster", poster.buffer, text(data, "posterAlt") || `${input.title} preview`);
     for (const [i, shot] of screenshots.entries()) {
       await addProductMedia(productId, "screenshot", shot.buffer, `${input.title} screenshot ${i + 1}`);
@@ -215,6 +228,30 @@ export async function uploadMediaAction(productId: string, _prev: AdminFormState
     await addProductMedia(productId, kind, upload.buffer, text(data, "alt"));
     updateTag(CATALOGUE_TAG);
     return ok(kind === "poster" ? "Poster updated." : "Screenshot added.");
+  } catch (error) {
+    return failure(error);
+  }
+}
+
+export async function uploadVideoAction(productId: string, _prev: AdminFormState, data: FormData): Promise<AdminFormState> {
+  try {
+    await requireAdminAction();
+    const upload = await readUpload(data, "video");
+    if (!upload) throw new AdminInputError("Choose a video to upload.");
+    await setProductVideo(productId, upload.buffer);
+    updateTag(CATALOGUE_TAG);
+    return ok("Video updated.");
+  } catch (error) {
+    return failure(error);
+  }
+}
+
+export async function removeVideoAction(productId: string): Promise<AdminFormState> {
+  try {
+    await requireAdminAction();
+    await removeProductVideo(productId);
+    updateTag(CATALOGUE_TAG);
+    return ok("Video removed.");
   } catch (error) {
     return failure(error);
   }

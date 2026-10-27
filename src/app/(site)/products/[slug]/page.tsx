@@ -95,7 +95,7 @@ async function ProductView({ params }: Pick<PageProps<"/products/[slug]">, "para
           </header>
 
           <div className="mt-8">
-            <PreviewFrame title={product.title} slug={product.slug} demoUrl={demoUrlFor(version?.demoKey)} poster={product.poster} />
+            <PreviewFrame title={product.title} slug={product.slug} demoUrl={demoUrlFor(version?.demoKey)} poster={product.poster} video={product.video} />
           </div>
         </div>
 

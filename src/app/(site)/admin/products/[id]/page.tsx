@@ -3,19 +3,22 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { ActionButton } from "@/components/admin/ActionButton";
-import { MediaUploadForm, NewVersionForm, VersionTextForm } from "@/components/admin/ProductEditorForms";
+import { MediaUploadForm, NewVersionForm, VersionTextForm, VideoUploadForm } from "@/components/admin/ProductEditorForms";
 import { ProductForm } from "@/components/admin/ProductForm";
 import { MediaImage } from "@/components/MediaImage";
 import { formatBytes, formatDate } from "@/lib/format";
+import { videoUrl } from "@/lib/media";
 import {
   createVersionAction,
   deleteDraftAction,
   releaseVersionAction,
   removeMediaAction,
+  removeVideoAction,
   setProductStatusAction,
   updateProductAction,
   updateVersionTextAction,
   uploadMediaAction,
+  uploadVideoAction,
 } from "@/server/actions/admin";
 import { getProductForAdmin, getVersionPrompt, listCategoriesWithUsage, listTagsWithUsage } from "@/server/admin/catalogue";
 import { demoUrlFor } from "@/server/demo-url";
@@ -136,6 +139,25 @@ async function Editor({ params, searchParams }: Pick<PageProps<"/admin/products/
               topic: allTags.filter((t) => t.kind === "topic").map((t) => t.name),
             }}
           />
+        </div>
+      </section>
+
+      <section aria-labelledby="video-title">
+        <h2 id="video-title" className="text-lg font-medium">
+          Preview video
+        </h2>
+        <p className="mt-1 text-sm text-muted">Plays on the product card and in the quick-view pop-up. Without one, the card shows the poster.</p>
+        {p.videoKey && (
+          <figure className="mt-4 max-w-md overflow-hidden rounded-xl border border-line">
+            <video src={videoUrl(p.videoKey)} muted loop playsInline controls preload="metadata" className="aspect-video w-full bg-black object-contain" />
+            <figcaption className="flex items-center justify-between gap-2 p-3 text-xs">
+              <span className="font-mono uppercase text-subtle">video</span>
+              <ActionButton action={removeVideoAction.bind(null, p.id)} label="Remove" variant="ghost" confirm="Remove this video?" />
+            </figcaption>
+          </figure>
+        )}
+        <div className="mt-4">
+          <VideoUploadForm action={uploadVideoAction.bind(null, p.id)} hasVideo={Boolean(p.videoKey)} />
         </div>
       </section>
 

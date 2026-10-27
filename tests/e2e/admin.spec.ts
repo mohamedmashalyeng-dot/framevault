@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 import path from "node:path";
 import yazl from "yazl";
-import { ADMIN, signIn } from "./helpers";
+import { ADMIN, makePreviewVideo, signIn } from "./helpers";
 
 async function makeZip(files: Record<string, string>): Promise<Buffer> {
   const zip = new yazl.ZipFile();
@@ -23,6 +23,7 @@ test.describe("administration", () => {
       await page.getByLabel("Category").selectOption({ label: "Sections" });
       await page.getByLabel("Tagline").fill("A calm hero section in plain HTML and CSS.");
       await page.getByLabel("Description", { exact: true }).fill("A hero section uploaded by the admin end-to-end test.");
+      await page.getByLabel(/^Premium/).check();
       await page.getByLabel("Price").fill("15");
       await page.getByLabel("Technologies").fill("HTML, CSS");
       await page.getByLabel("Visual styles").fill("Minimal");
@@ -64,6 +65,7 @@ test.describe("administration", () => {
 
     await visitor.goto("/catalogue?q=halo");
     await expect(visitor.getByRole("heading", { level: 3, name: "Halo Hero Section" })).toBeVisible();
+    await expect(visitor.locator("article", { hasText: "Halo Hero Section" })).toContainText("Premium");
     await visitor.goto("/products/halo-hero-section");
     await expect(visitor.getByRole("region", { name: "What you get" })).toContainText("Source code ZIP (halo-hero.zip)");
     await expect(visitor.getByRole("region", { name: "What you get" })).toContainText("AI prompt");
@@ -89,6 +91,49 @@ test.describe("administration", () => {
     await visitor.goto("/catalogue?q=halo");
     await expect(visitor.getByText("No products match these filters.")).toBeVisible();
     await visitor.close();
+  });
+
+  test("upload a free prompt with a preview video and no poster", async ({ page, browser }) => {
+    await signIn(page, ADMIN, "/admin/products/new");
+    const webm = await makePreviewVideo(page);
+    await page.getByLabel("Video", { exact: true }).setInputFiles({ name: "drift.webm", mimeType: "video/webm", buffer: webm });
+    await expect(page.getByRole("region", { name: "Preview video" }).locator("video")).toHaveCount(1);
+    await page.getByLabel("Title").fill("Drift Loop Prompt");
+    await page.getByLabel("Category").selectOption({ label: "Sections" });
+    await page.getByLabel("Description", { exact: true }).fill("A looping motion study, shared as a free prompt.");
+    await expect(page.getByLabel(/^Free/)).toBeChecked();
+    await expect(page.getByLabel("Price")).toBeDisabled();
+    await page.getByLabel(/^Prompt/).fill("Animate a mint square drifting across a dark stage.");
+    await page.getByRole("button", { name: "Upload product" }).click();
+    await page.waitForURL(/\/admin\/products\/prd_.+\?uploaded=1/);
+    await expect(page.getByText("Product uploaded and published. It is live in the catalogue.")).toBeVisible();
+    // The poster was taken from the video.
+    await expect(page.getByRole("region", { name: "Preview media" }).getByRole("figure")).toHaveCount(1);
+    await expect(page.getByRole("region", { name: "Preview video" }).locator("video")).toHaveCount(1);
+
+    const context = await browser.newContext({ permissions: ["clipboard-read", "clipboard-write"] });
+    const visitor = await context.newPage();
+    await visitor.goto("/catalogue?q=drift");
+    const card = visitor.locator("article", { hasText: "Drift Loop Prompt" });
+    await expect(card).not.toContainText("Premium");
+    const src = await card.locator("video").getAttribute("src");
+    expect(src).toMatch(/^\/media\/p\/prd_[\w-]+\/video-[\w-]+\.webm$/);
+    const partial = await visitor.request.get(src!, { headers: { range: "bytes=0-99" } });
+    expect(partial.status()).toBe(206);
+    expect((await partial.body()).length).toBe(100);
+
+    await card.getByRole("link", { name: "Drift Loop Prompt" }).click();
+    const dialog = visitor.getByRole("dialog", { name: "Drift Loop Prompt" });
+    await expect(dialog.locator("video")).toHaveAttribute("src", src!);
+    await dialog.getByRole("button", { name: "Copy prompt" }).click();
+    await expect(dialog.getByRole("button", { name: "Copied" })).toBeVisible();
+    expect(await visitor.evaluate(() => navigator.clipboard.readText())).toBe("Animate a mint square drifting across a dark stage.");
+    await context.close();
+
+    // Archive it again so the catalogue tests see the seeded inventory only.
+    page.once("dialog", (d) => d.accept());
+    await page.getByRole("button", { name: "Archive", exact: true }).click();
+    await expect(page.getByRole("button", { name: "Re-publish" })).toBeVisible();
   });
 
   test("a new version can be released from the product editor", async ({ page }) => {

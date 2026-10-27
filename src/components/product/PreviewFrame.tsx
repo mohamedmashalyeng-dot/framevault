@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import type { MediaRef } from "@/lib/media";
+import { mediaFallback, type MediaRef } from "@/lib/media";
 import { ArrowUpRight, Monitor, Phone, Play, Tablet } from "../icons";
 import { MediaImage } from "../MediaImage";
 
@@ -15,19 +15,22 @@ const DEVICES = [
 type DeviceId = (typeof DEVICES)[number]["id"];
 
 /**
- * Shows the poster first and mounts the sandboxed demo only when asked, so a
- * product page never loads more than one interactive demo by default.
+ * Shows the preview clip (or poster) first and mounts the sandboxed demo only
+ * when asked, so a product page never loads more than one interactive demo by
+ * default.
  */
 export function PreviewFrame({
   title,
   slug,
   demoUrl,
   poster,
+  video = null,
 }: {
   title: string;
   slug: string;
   demoUrl: string | null;
   poster: MediaRef | null;
+  video?: string | null;
 }) {
   const [loaded, setLoaded] = useState(false);
   const [device, setDevice] = useState<DeviceId>("desktop");
@@ -86,7 +89,19 @@ export function PreviewFrame({
           </div>
         ) : (
           <div className="relative">
-            {poster ? (
+            {video ? (
+              <video
+                src={video}
+                poster={poster ? mediaFallback(poster) : undefined}
+                autoPlay
+                muted
+                loop
+                playsInline
+                controls={!demoUrl}
+                aria-label={`${title} preview video`}
+                className="aspect-video w-full bg-black object-contain"
+              />
+            ) : poster ? (
               <MediaImage media={poster} priority sizes="(min-width: 1024px) 880px, 100vw" className="aspect-[16/10] w-full object-cover object-top" />
             ) : (
               <div className="aspect-[16/10] w-full bg-graphite-850" />

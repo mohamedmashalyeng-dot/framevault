@@ -137,6 +137,8 @@ export const product = sqliteTable(
     isDemoContent: integer("is_demo_content", { mode: "boolean" }).notNull().default(false),
     licenceType: text("licence_type", { enum: ["free", "standard"] }).notNull().default("standard"),
     licenceSummary: text("licence_summary").notNull().default(""),
+    /** Public preview clip in the media area (`p/<id>/video-<token>.mp4|webm`). */
+    videoKey: text("video_key"),
     currentVersionId: text("current_version_id"),
     publishedAt: integer("published_at", { mode: "timestamp_ms" }),
     ...timestamps,
