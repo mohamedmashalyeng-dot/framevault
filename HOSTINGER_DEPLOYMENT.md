@@ -40,7 +40,6 @@ DEMO_ORIGIN=
 STORE_CURRENCY=USD
 DEMO_PRICING=false
 NEXT_PUBLIC_BRAND_NAME=FRAMEVAULT
-NEXT_PUBLIC_SUPPORT_EMAIL=support@your-domain.com
 
 PAYMENT_PROVIDER=stripe
 STRIPE_SECRET_KEY=sk_live_or_sk_test_value
@@ -53,8 +52,9 @@ RESEND_API_KEY=
 
 On the managed Node.js Web App, the app runs from
 `~/domains/<domain>/hbuilds/current/nodejs`, which is replaced on every deploy.
-Set `STORAGE_DIR` to an absolute path outside `hbuilds`, for example
-`/home/<user>/domains/<domain>/storage`, so uploads survive redeploys.
+A relative `STORAGE_DIR` is therefore resolved next to `hbuilds`, so `./storage`
+becomes `~/domains/<domain>/storage` and uploads survive redeploys. An absolute
+path is used as given.
 
 For a test deployment without Stripe, use `APP_ENV=staging` and
 `PAYMENT_PROVIDER=simulated`. Do not use simulated payments for production.
