@@ -25,7 +25,7 @@ let categoryId: string | null = null;
 
 /** Creates a published product with a prompt and (optionally) a stored archive. */
 export async function createTestProduct(opts: { priceCents: number; withArchive?: boolean; slug?: string; publish?: boolean }) {
-  categoryId ??= await saveCategory({ name: "Components", slug: "components" });
+  categoryId ??= await saveCategory({ name: "Test category", slug: "test-category" });
   const slug = opts.slug ?? `product-${Math.random().toString(36).slice(2, 9)}`;
   const productId = await createProduct({
     title: `Product ${slug}`,
