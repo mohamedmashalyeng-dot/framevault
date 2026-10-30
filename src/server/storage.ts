@@ -21,8 +21,17 @@ export type StorageArea = "private" | "demos" | "media" | "outbox";
 
 const KEY_PATTERN = /^[a-zA-Z0-9][a-zA-Z0-9._\-/]*$/;
 
+/**
+ * Hostinger replaces everything under `hbuilds` on each deploy, so a relative
+ * STORAGE_DIR there is anchored next to that folder and uploads survive.
+ */
+export function resolveStorageRoot(dir: string, cwd: string) {
+  const [base] = cwd.split(/[\\/]hbuilds(?=[\\/]|$)/);
+  return path.resolve(/*turbopackIgnore: true*/ base, dir);
+}
+
 export function storageRoot() {
-  return path.resolve(/*turbopackIgnore: true*/ process.cwd(), env().STORAGE_DIR);
+  return resolveStorageRoot(env().STORAGE_DIR, /*turbopackIgnore: true*/ process.cwd());
 }
 
 /** Resolve a key inside an area, refusing anything that escapes it. */
